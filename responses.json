@@ -7,7 +7,6 @@
         "Q": "What is diabetes?",
         "A": "Diabetes is a chronic condition that occurs when the body cannot properly process food for use as energy."
     },
-
     {
         "Q": "What is asthma?",
         "A": "Asthma is a chronic inflammatory disease of the airways that causes difficulty in breathing, coughing, wheezing, and chest tightness."
@@ -18,7 +17,7 @@
     },
     {
         "Q": "How is asthma treated?",
-        "A": "Treatment typically involves inhaled corticosteroids, bronchodilators, and avoiding triggers. Severe cases may require oral medications or biologics."
+        "A": "Treatment typically involves inhaled corticosteroids, bronchodilators, and avoiding triggers."
     },
     {
         "Q": "What is considered high blood pressure?",
@@ -37,12 +36,8 @@
         "A": "Symptoms may include chest pain, shortness of breath, fatigue, and palpitations."
     },
     {
-        "Q": "What is diabetes?",
-        "A": "Diabetes is a chronic condition characterized by high blood sugar levels due to either insulin resistance (Type 2) or insufficient insulin production (Type 1)."
-    },
-    {
         "Q": "How can diabetes be managed?",
-        "A": "Management includes monitoring blood sugar levels, dietary changes, regular exercise, and medication (insulin or oral hypoglycemics)."
+        "A": "Management includes monitoring blood sugar levels, dietary changes, regular exercise, and medication."
     },
     {
         "Q": "How important is exercise for managing chronic diseases?",
@@ -50,7 +45,7 @@
     },
     {
         "Q": "Does family history affect my risk of chronic diseases?",
-        "A": "Yes, a family history of conditions like heart disease, diabetes, or hypertension can increase your risk, but lifestyle choices also play a significant role."
+        "A": "Yes, a family history of conditions like heart disease, diabetes, or hypertension can increase your risk."
     },
     {
         "Q": "What role do genetics play in chronic diseases?",
@@ -58,30 +53,26 @@
     },
     {
         "Q": "What are the symptoms of hypertension?",
-        "A": "Hypertension is often called the 'silent killer' because it usually has no symptoms. However, very high blood pressure may cause headaches, shortness of breath, or nosebleeds."
-    },
-    {
-        "Q": "What types of inhalers are used for asthma and COPD?",
-        "A": "There are two main types: rescue inhalers (short-acting bronchodilators) for quick relief and maintenance inhalers (long-acting bronchodilators or corticosteroids) for daily control."
+        "A": "Hypertension is often called the 'silent killer' because it usually has no symptoms."
     },
     {
         "Q": "How does junk food affect chronic diseases?",
-        "A": "Junk food, which is high in sugars, unhealthy fats, and salt, can contribute to obesity, hypertension, diabetes, and cardiovascular diseases."
+        "A": "Junk food can contribute to obesity, hypertension, diabetes, and cardiovascular diseases."
     },
     {
         "Q": "How can knowledge of my condition improve my health?",
-        "A": "Understanding your condition helps you make informed decisions about your lifestyle, treatment options, and management strategies, leading to better health outcomes."
+        "A": "Understanding your condition helps you make informed decisions about your lifestyle and treatment options."
     },
     {
         "Q": "What lifestyle changes can help prevent chronic diseases?",
-        "A": "Key changes include maintaining a healthy diet, regular physical activity, quitting smoking, limiting alcohol intake, and managing stress."
+        "A": "Key changes include maintaining a healthy diet, regular physical activity, quitting smoking, and managing stress."
     },
     {
         "Q": "What medications are commonly prescribed for hypertension?",
-        "A": "Common medications include diuretics, ACE inhibitors, beta-blockers, calcium channel blockers, and ARBs (angiotensin receptor blockers)."
+        "A": "Common medications include diuretics, ACE inhibitors, beta-blockers, calcium channel blockers, and ARBs."
     },
     {
         "Q": "How does nutrition affect diabetes management?",
-        "A": "Proper nutrition helps regulate blood sugar levels. A balanced diet rich in whole grains, fruits, vegetables, and lean proteins is recommended."
-     }
+        "A": "Proper nutrition helps regulate blood sugar levels with a balanced diet rich in whole grains, fruits, and vegetables."
+    }
 ]
