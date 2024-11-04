@@ -42,13 +42,13 @@ def display_qa_for_selection(qa_list):
         return
 
     # List the questions with buttons for selection
-    for item in qa_list:
-        if st.button(f"**{item['Q']}**"):
+    for index, item in enumerate(qa_list):
+        if st.button(f"**{item['Q']}**", key=f"button_{index}"):
             # Display the answer
             st.write(f"**Answer**: {item['A']}")
             
             # Add to favorites button
-            if st.button(f"Add '{item['Q']}' to Favorites"):
+            if st.button(f"Add '{item['Q']}' to Favorites", key=f"favorite_{index}"):
                 favorites.append(item)
                 st.success(f"Added '{item['Q']}' to your favorites!")
 
