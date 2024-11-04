@@ -6,7 +6,7 @@
     {
         "Q": "What is diabetes?",
         "A": "Diabetes is a chronic condition that occurs when the body cannot properly process food for use as energy."
-    }
+    },
 
     {
         "Q": "What is asthma?",
@@ -83,5 +83,5 @@
     {
         "Q": "How does nutrition affect diabetes management?",
         "A": "Proper nutrition helps regulate blood sugar levels. A balanced diet rich in whole grains, fruits, vegetables, and lean proteins is recommended."
-     },
+     }
 ]
