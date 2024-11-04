@@ -11,13 +11,21 @@ def load_qa_data():
 qa_data = load_qa_data()
 favorites = []
 
-# Display Q&A for user selection
+# Display Q&A for user selection with answers
 def display_qa_for_selection(qa_list):
     if not qa_list:
         st.write("No results found.")
         return
+    
     for i, item in enumerate(qa_list, start=1):
-        st.write(f"**{i}.** {item['Q']}")
+        if st.button(f"**{i}.** {item['Q']}"):
+            # When the button is clicked, show the answer
+            st.write(f"**Answer**: {item['A']}")
+            
+            # Add to favorites button
+            if st.button(f"Add '{item['Q']}' to Favorites"):
+                favorites.append(item)
+                st.success(f"Added '{item['Q']}' to your favorites!")
 
 # Search function to filter questions based on query
 def search_qa(query):
@@ -39,12 +47,6 @@ def main():
             st.write(f"Found {len(results)} matching question(s):")
             display_qa_for_selection(results)
 
-            # Select a question to add to favorites
-            question_number = st.number_input("Select a question number to add to your favorites:", min_value=1, max_value=len(results), step=1)
-            if st.button("Add to Favorites"):
-                selected_question = results[question_number - 1]
-                favorites.append(selected_question)
-                st.success(f"Question added to favorites: {selected_question['Q']}")
         else:
             st.warning("No questions found matching your search. Please try a different keyword.")
 
