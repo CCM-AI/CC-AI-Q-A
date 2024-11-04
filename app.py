@@ -10,7 +10,7 @@ with open('responses.json', 'r', encoding='utf-8') as f:
 translator = Translator()
 
 # Streamlit app layout
-st.title("Multilingual Assistant")
+st.title("Personal Assistant")
 user_input = st.text_input("Ask your question:")
 
 if user_input:
