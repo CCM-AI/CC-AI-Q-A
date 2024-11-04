@@ -41,16 +41,20 @@ def display_qa_for_selection(qa_list):
         st.write("No results found.")
         return
 
+    selected_questions = []  # Keep track of selected questions
     # List the questions with buttons for selection
     for item in qa_list:
         if st.button(f"**{item['Q']}**"):
             # Display the answer
             st.write(f"**Answer**: {item['A']}")
+            selected_questions.append(item)  # Add selected question to the list
             
             # Add to favorites button
             if st.button(f"Add '{item['Q']}' to Favorites"):
                 favorites.append(item)
                 st.success(f"Added '{item['Q']}' to your favorites!")
+
+    return selected_questions  # Return the list of selected questions
 
 # Main Streamlit app
 def main():
@@ -60,6 +64,8 @@ def main():
     # Option to choose between search or selection
     option = st.radio("Choose how you want to explore:", ["Search by Keywords", "Select from a List"])
 
+    selected_questions = []  # Keep track of selected questions
+
     if option == "Search by Keywords":
         query = st.text_input("Enter a keyword to search for questions:")
         
@@ -68,26 +74,15 @@ def main():
             
             if results:
                 st.write(f"Found {len(results)} matching question(s):")
-                display_qa_for_selection(results)
+                selected_questions = display_qa_for_selection(results)
 
             else:
                 st.warning("No questions found matching your search. Please try a different keyword.")
 
     elif option == "Select from a List":
-        # Get a list of unique categories for selection
-        categories = list(set(tag for item in qa_data for tag in item['tags']))
-        categories.sort()  # Sorting categories alphabetically
-        
-        selected_category = st.selectbox("Choose a category:", categories)
-        
-        # Filter questions by the selected category
-        filtered_qa = [item for item in qa_data if selected_category in item['tags']]
-        
-        if filtered_qa:
-            st.write(f"Questions related to {selected_category}:")
-            display_qa_for_selection(filtered_qa)
-        else:
-            st.write(f"No questions found for the category '{selected_category}'.")
+        # Display all questions since there are no categories
+        st.write("Here are all the questions available:")
+        selected_questions = display_qa_for_selection(qa_data)
 
     # Display the user's favorites
     if favorites:
@@ -99,9 +94,9 @@ def main():
     if not favorites:
         st.write("You haven't added any questions to your favorites yet. Try selecting or searching one.")
 
-    # Optionally, show a mind map if there are questions displayed
-    if query or selected_category:
-        display_mind_map(qa_data)
+    # Optionally, show a mind map if there are selected questions
+    if selected_questions:
+        display_mind_map(selected_questions)
 
 if __name__ == "__main__":
     main()
