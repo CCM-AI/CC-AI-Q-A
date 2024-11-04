@@ -1,13 +1,14 @@
 import streamlit as st
+import json
 
-# Sample Q&A data with tags
-qa_data = [
-    {"tags": ["asthma"], "Q": "What is asthma?", "A": "Asthma is a chronic inflammatory disease of the airways that causes difficulty in breathing."},
-    {"tags": ["blood pressure", "hypertension"], "Q": "What is considered high blood pressure?", "A": "High blood pressure (hypertension) is generally defined as a reading of 130/80 mm Hg or higher."},
-    {"tags": ["diabetes"], "Q": "What is diabetes?", "A": "Diabetes is a chronic condition characterized by high blood sugar levels."},
-    # Add more Q&A pairs as needed...
-]
+# Load Q&A data from JSON file
+def load_qa_data():
+    with open('responses.json', 'r') as f:
+        qa_data = json.load(f)
+    return qa_data
 
+# Load the initial Q&A data
+qa_data = load_qa_data()
 favorites = []
 
 # Function to display Q&A
@@ -24,9 +25,9 @@ def search_qa(query):
     results = [item for item in qa_data if query.lower() in item['Q'].lower()]
     return results
 
-# Function to filter Q&A by tag
+# Function to filter Q&A by tag (you can implement this if your data has tags)
 def filter_by_tag(tag):
-    results = [item for item in qa_data if tag.lower() in (t.lower() for t in item['tags'])]
+    results = [item for item in qa_data if tag.lower() in item.get('tags', [])]
     return results
 
 # Main Streamlit app
