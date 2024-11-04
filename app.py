@@ -1,4 +1,4 @@
-import json
+import streamlit as st
 
 # Sample Q&A data with tags
 qa_data = [
@@ -10,66 +10,71 @@ qa_data = [
 
 favorites = []
 
+# Function to display Q&A
 def display_qa(qa_list):
     if not qa_list:
-        print("No results found.")
+        st.write("No results found.")
         return
-    for i, item in enumerate(qa_list, start=1):
-        print(f"{i}. Q: {item['Q']}\n   A: {item['A']}\n")
+    for item in qa_list:
+        st.write(f"**Q:** {item['Q']}")
+        st.write(f"**A:** {item['A']}")
 
+# Function to search Q&A
 def search_qa(query):
     results = [item for item in qa_data if query.lower() in item['Q'].lower()]
     return results
 
+# Function to filter Q&A by tag
 def filter_by_tag(tag):
     results = [item for item in qa_data if tag.lower() in (t.lower() for t in item['tags'])]
     return results
 
-def add_to_favorites(question):
-    favorites.append(question)
-    print("Added to favorites!")
-
-def view_favorites():
-    if not favorites:
-        print("No favorite questions saved.")
-        return
-    display_qa(favorites)
-
+# Main Streamlit app
 def main():
-    while True:
-        print("Welcome to the Q&A Tool!")
-        print("1. View all questions")
-        print("2. Search for a question")
-        print("3. Filter by tag")
-        print("4. View favorite questions")
-        print("5. Add a question to favorites")
-        print("6. Exit")
-        
-        choice = input("Choose an option: ")
-        
-        if choice == '1':
-            display_qa(qa_data)
-        elif choice == '2':
-            query = input("Enter a search term: ")
+    st.title("Q&A Tool")
+
+    # Sidebar options
+    option = st.sidebar.selectbox("Choose an option", [
+        "View all questions",
+        "Search for a question",
+        "Filter by tag",
+        "View favorite questions",
+        "Add a question to favorites",
+        "Exit"
+    ])
+
+    if option == "View all questions":
+        display_qa(qa_data)
+    
+    elif option == "Search for a question":
+        query = st.text_input("Enter a search term:")
+        if query:
             results = search_qa(query)
             display_qa(results)
-        elif choice == '3':
-            tag = input("Enter a tag (e.g., asthma, diabetes): ")
+
+    elif option == "Filter by tag":
+        tag = st.text_input("Enter a tag (e.g., asthma, diabetes):")
+        if tag:
             results = filter_by_tag(tag)
             display_qa(results)
-        elif choice == '4':
-            view_favorites()
-        elif choice == '5':
-            question_number = int(input("Enter the question number you want to add to favorites: ")) - 1
-            if 0 <= question_number < len(qa_data):
-                add_to_favorites(qa_data[question_number])
-            else:
-                print("Invalid question number.")
-        elif choice == '6':
-            print("Exiting the Q&A Tool. Goodbye!")
-            break
+
+    elif option == "View favorite questions":
+        if not favorites:
+            st.write("No favorite questions saved.")
         else:
-            print("Invalid choice. Please try again.")
+            display_qa(favorites)
+
+    elif option == "Add a question to favorites":
+        question_number = st.number_input("Enter the question number you want to add to favorites:", min_value=1, max_value=len(qa_data), step=1)
+        if st.button("Add to Favorites"):
+            if 1 <= question_number <= len(qa_data):
+                favorites.append(qa_data[question_number - 1])
+                st.write("Added to favorites!")
+            else:
+                st.write("Invalid question number.")
+
+    elif option == "Exit":
+        st.write("Exiting the Q&A Tool. Goodbye!")
 
 if __name__ == "__main__":
     main()
