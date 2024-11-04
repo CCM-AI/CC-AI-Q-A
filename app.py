@@ -60,6 +60,9 @@ def main():
     # Option to choose between search or selection
     option = st.radio("Choose how you want to explore:", ["Search by Keywords", "Select from a List"])
 
+    # Initialize query variable
+    query = ""
+
     if option == "Search by Keywords":
         query = st.text_input("Enter a keyword to search for questions:")
         
@@ -89,7 +92,7 @@ def main():
 
     # Optionally, show a mind map if there are questions displayed
     if query:
-        display_mind_map(results)
+        display_mind_map(search_qa(query))
 
 if __name__ == "__main__":
     main()
