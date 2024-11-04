@@ -1,29 +1,24 @@
 import streamlit as st
 import json
-from googletrans import Translator
+from fuzzywuzzy import process
 
-# Load the responses from the JSON file
-with open('responses.json', 'r', encoding='utf-8') as f:
+# Load responses from JSON file
+with open('responses.json') as f:
     responses = json.load(f)
-
-# Initialize the translator
-translator = Translator()
 
 # Streamlit app layout
 st.title("Personal Assistant")
-user_input = st.text_input("Ask your question:")
+st.write("Ask me about health conditions and treatments.")
 
+# User input
+user_input = st.text_input("What would you like to know?").lower()
+
+# Check for response
 if user_input:
-    # Translate the user input to English
-    translated_input = translator.translate(user_input, dest='en').text
-    
-    # Check for response
-    response_found = False
-    for entry in responses:
-        if entry["Q"].lower() == translated_input.lower():
-            st.write(entry["A"])
-            response_found = True
-            break
-    
-    if not response_found:
+    question_list = [item["Q"].lower() for item in responses]
+    response = process.extractOne(user_input, question_list)
+    if response[1] > 80:  # Confidence threshold
+        answer = next(item for item in responses if item["Q"].lower() == response[0])
+        st.write(answer["A"])
+    else:
         st.write("I'm sorry, I don't have information on that topic.")
