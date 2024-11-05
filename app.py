@@ -1,6 +1,6 @@
 import streamlit as st
 import json
-from googletrans import Translator
+from googletrans import Translator, LANGUAGES
 
 # Load the Q&A data from JSON
 def load_qa_data():
@@ -18,12 +18,15 @@ if 'favorites' not in st.session_state:
 # Function to search questions by keyword
 def search_qa(query, lang='en'):
     translator = Translator()
-    
-    # Translate the query to the target language
-    translated_query = translator.translate(query, dest=lang).text.lower()
+    try:
+        # Translate the query to the target language
+        translated_query = translator.translate(query, dest=lang).text.lower()
 
-    # Search in the dataset for questions that match the translated query
-    results = [item for item in qa_data if translated_query in translator.translate(item['Q'], dest=lang).text.lower()]
+        # Search in the dataset for questions that match the translated query
+        results = [item for item in qa_data if translated_query in translator.translate(item['Q'], dest=lang).text.lower()]
+    except Exception as e:
+        st.error(f"Translation error: {e}")
+        return []
     return results
 
 # Function to toggle answers and add/remove favorites
@@ -71,17 +74,7 @@ def display_qa_for_selection(qa_list, translate=False, lang='en', strings=None):
 
 # Translate language options dynamically
 def translate_language_options():
-    language_dict = {
-        'en': 'English',
-        'es': 'Español',
-        'fr': 'Français',
-        'de': 'Deutsch',
-        'it': 'Italiano',
-        'pt': 'Português',
-        'zh-cn': '中文',
-        'ar': 'اللغة العربية'
-    }
-    return language_dict
+    return LANGUAGES  # Utilize googletrans's built-in language support
 
 # Translate the label "What does this mean in your own language?" dynamically
 def translate_label_text(lang):
@@ -108,7 +101,9 @@ def get_translated_strings(lang):
             'removed': "Removed",
             'from_my_list': "from MY LIST.",
             'added': "Added",
-            'to_my_list': "to MY LIST."
+            'to_my_list': "to MY LIST.",
+            'found': "Found",
+            'matching_question': "matching questions"
         },
         'es': {
             'welcome': "¡Bienvenido! Puedes buscar preguntas, seleccionar de una lista de temas o ver tus favoritos guardados.",
@@ -126,7 +121,9 @@ def get_translated_strings(lang):
             'removed': "Eliminado",
             'from_my_list': "de MI LISTA.",
             'added': "Agregado",
-            'to_my_list': "a MI LISTA."
+            'to_my_list': "a MI LISTA.",
+            'found': "Encontrado",
+            'matching_question': "preguntas coincidentes"
         },
         'fr': {
             'welcome': "Bienvenue! Vous pouvez rechercher des questions, sélectionner dans une liste de sujets ou consulter vos favoris enregistrés.",
@@ -144,7 +141,9 @@ def get_translated_strings(lang):
             'removed': "Retiré",
             'from_my_list': "de MA LISTE.",
             'added': "Ajouté",
-            'to_my_list': "à MA LISTE."
+            'to_my_list': "à MA LISTE.",
+            'found': "Trouvé",
+            'matching_question': "questions correspondantes"
         },
         'ar': {
             'welcome': "مرحباً! يمكنك البحث عن الأسئلة، أو اختيار من قائمة المواضيع، أو عرض المفضلة المحفوظة.",
@@ -162,7 +161,9 @@ def get_translated_strings(lang):
             'removed': "تم الإزالة",
             'from_my_list': "من قائمتي.",
             'added': "تم الإضافة",
-            'to_my_list': "إلى قائمتي."
+            'to_my_list': "إلى قائمتي.",
+            'found': "تم العثور",
+            'matching_question': "الأسئلة المطابقة"
         }
     }
     return strings.get(lang, strings['en'])  # Default to English if language not found
@@ -172,7 +173,7 @@ def main():
     # Language selection for translation (moved to top to avoid UnboundLocalError)
     language_dict = translate_language_options()
     target_language = st.selectbox(
-        "What does this mean in your own language?",  # Prompt dynamically translated
+        translate_label_text('en'),  # Prompt dynamically translated
         list(language_dict.keys()), 
         format_func=lambda x: language_dict[x]
     )
