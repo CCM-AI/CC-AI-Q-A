@@ -2,7 +2,7 @@ import streamlit as st
 import json
 from googletrans import Translator
 
-# Load the Q&A data from JSON
+# Load the Q&A data from JSON (assuming questions are in English)
 def load_qa_data():
     with open('responses.json', 'r') as f:
         qa_data = json.load(f)
@@ -15,33 +15,30 @@ qa_data = load_qa_data()
 if 'favorites' not in st.session_state:
     st.session_state.favorites = []
 
-# Function to search questions by keyword
+# Function to search questions by keyword (searching in English, displaying in selected language)
 def search_qa(query, lang='en'):
+    # Translate the query to the selected language
     translator = Translator()
     translated_query = translator.translate(query, dest=lang).text
-
-    # Match with original English questions
-    results = []
-    for item in qa_data:
-        translated_question = translator.translate(item['Q'], dest=lang).text
-        if translated_query.lower() in translated_question.lower():
-            results.append(item)
     
+    # Search the original English questions for the translated query (case insensitive)
+    results = [item for item in qa_data if translated_query.lower() in item['Q'].lower()]
     return results
 
 # Function to toggle answers and add/remove favorites
 def display_qa_for_selection(qa_list, translate=False, lang='en'):
     if not qa_list:
-        st.write(translations[lang]["no_results"])
+        st.write("No results found.")
         return
 
     for idx, item in enumerate(qa_list):
-        question_key = f"question_{idx}_{item['Q']}"
-        answer_key = f"answer_{idx}_{item['Q']}"
-
+        question_key = f"question_{idx}_{item['Q']}"  # Create a unique key for each question
+        answer_key = f"answer_{idx}_{item['Q']}"  # Create a unique key for each answer
+        
         # Show question with a button to toggle the answer
         show_answer = st.session_state.get(answer_key, False)
-        if st.button(f"**{item['Q']}**", key=question_key):
+        if st.button(f"**{item['Q']}**", key=question_key, help="Click to toggle answer visibility"):
+            # Toggle the answer visibility
             st.session_state[answer_key] = not show_answer
             show_answer = not show_answer
 
@@ -56,84 +53,98 @@ def display_qa_for_selection(qa_list, translate=False, lang='en'):
 
         # Show the translated answer if toggled
         if show_answer:
-            st.write(f"**{translations[lang]['answer_label']}**: {translated_answer}")
+            st.write(f"**Answer**: {translated_answer}")
 
-        # Favorite buttons
-        favorite_key = f"favorite_{idx}_{item['Q']}"
+        # Distinguish the "Add to MY LIST" and "Remove from MY LIST" buttons by styling
+        favorite_key = f"favorite_{idx}_{item['Q']}"  # Unique key for add/remove favorite
         if item in st.session_state.favorites:
-            if st.button(f"❌ {translations[lang]['remove_favorite']}", key=f"remove_{favorite_key}"):
+            # Styled 'Remove from MY LIST' button
+            if st.button(f"❌ Remove from MY LIST", key=f"remove_{favorite_key}", help="Click to remove from favorites", use_container_width=True):
                 st.session_state.favorites.remove(item)
-                st.success(f"Removed '{translated_question}' from {translations[lang]['my_list']}.")
+                st.success(f"Removed '{translated_question}' from MY LIST.")
         else:
-            if st.button(f"✔️ {translations[lang]['add_favorite']}", key=f"add_{favorite_key}"):
+            # Styled 'Add to MY LIST' button
+            if st.button(f"✔️ Add to MY LIST", key=f"add_{favorite_key}", help="Click to add to favorites", use_container_width=True):
                 st.session_state.favorites.append(item)
-                st.success(f"Added '{translated_question}' to {translations[lang]['my_list']}.")
+                st.success(f"Added '{translated_question}' to MY LIST.")
 
-# Translation dictionary for UI text
-translations = {
-    'en': {
-        "welcome": "Welcome! You can either search for questions, select from a list of topics, or view your saved favorites.",
-        "search_prompt": "Enter a keyword to search for questions:",
-        "choose_option": "Choose an option to explore:",
-        "select_list": "Select from a List",
-        "my_list": "MY LIST: Your Favorite Questions and Answers",
-        "no_results": "No results found.",
-        "answer_label": "Answer",
-        "remove_favorite": "Remove from MY LIST",
-        "add_favorite": "Add to MY LIST"
-    },
-    'ar': {
-        "welcome": "مرحباً! يمكنك البحث عن الأسئلة، أو اختيار من قائمة المواضيع، أو عرض المفضلة المحفوظة.",
-        "search_prompt": "أدخل كلمة رئيسية للبحث عن الأسئلة:",
-        "choose_option": "اختر خيارًا للاستكشاف:",
-        "select_list": "اختر من قائمة",
-        "my_list": "قائمتي: أسئلتك وأجوبتك المفضلة",
-        "no_results": "لم يتم العثور على نتائج.",
-        "answer_label": "الإجابة",
-        "remove_favorite": "إزالة من قائمتي",
-        "add_favorite": "إضافة إلى قائمتي"
+# Translate language options dynamically
+def translate_language_options():
+    language_dict = {
+        'en': 'English',
+        'es': 'Español',
+        'fr': 'Français',
+        'de': 'Deutsch',
+        'it': 'Italiano',
+        'pt': 'Português',
+        'zh-cn': '中文',
+        'ar': 'اللغة العربية'
     }
-}
+    return language_dict
+
+# Translate the label "What does this mean in your own language?" dynamically
+def translate_label_text(lang):
+    translator = Translator()
+    text = "What does this mean in your own language?"
+    return translator.translate(text, dest=lang).text
 
 # Main Streamlit app
 def main():
-    # Language selection for translation
+    # Language selection for translation (moved to top to avoid UnboundLocalError)
+    language_dict = translate_language_options()
     target_language = st.selectbox(
-        translations['en']['search_prompt'],
-        ['en', 'ar'],
-        format_func=lambda x: 'English' if x == 'en' else 'العربية'
+        "What does this mean in your own language?",  # Prompt dynamically translated
+        list(language_dict.keys()), 
+        format_func=lambda x: language_dict[x]
     )
 
-    translate = target_language != 'en'
+    # Translate the "What does this mean in your own language?" label dynamically
+    translate = target_language != 'en'  # Only translate if language is not 'en' (default)
 
-    # Welcome message based on selected language
-    st.write(translations[target_language]['welcome'])
+    # Translate the "Welcome" message dynamically based on the selected language
+    welcome_text = {
+        'en': "Welcome! You can either search for questions, select from a list of topics, or view your saved favorites.",
+        'es': "¡Bienvenido! Puedes buscar preguntas, seleccionar de una lista de temas o ver tus favoritos guardados.",
+        'fr': "Bienvenue! Vous pouvez rechercher des questions, sélectionner dans une liste de sujets ou consulter vos favoris enregistrés.",
+        'de': "Willkommen! Sie können nach Fragen suchen, aus einer Themenliste auswählen oder Ihre gespeicherten Favoriten anzeigen.",
+        'it': "Benvenuto! Puoi cercare domande, selezionare da un elenco di argomenti o visualizzare i tuoi preferiti salvati.",
+        'pt': "Bem-vindo! Você pode procurar perguntas, selecionar a partir de uma lista de tópicos ou ver seus favoritos salvos.",
+        'zh-cn': "欢迎！你可以搜索问题，选择一个话题列表，或查看你保存的收藏。",
+        'ar': "مرحباً! يمكنك البحث عن الأسئلة، أو اختيار من قائمة المواضيع، أو عرض المفضلة المحفوظة."
+    }
+    
+    st.write(welcome_text.get(target_language, welcome_text['en']))
 
     # Option to choose between search or selection
-    option = st.radio(translations[target_language]['choose_option'], 
-                      [translations[target_language]['select_list'], 
-                       translations[target_language]['my_list']])
+    option = st.radio("Choose an option to explore:", ["Search by Keywords", "Select from a List", "MY LIST: Your Favorite Questions and Answers"])
 
     # Handle Search by Keywords
-    if option == translations[target_language]['select_list']:
-        query = st.text_input(translations[target_language]['search_prompt'])
+    if option == "Search by Keywords":
+        query = st.text_input("Enter a keyword to search for questions:")
 
         if query:
+            # Search in the selected language (translation happens here)
             results = search_qa(query, target_language)
 
             if results:
                 st.write(f"Found {len(results)} matching question(s):")
                 display_qa_for_selection(results, translate, target_language)
             else:
-                st.warning(translations[target_language]['no_results'])
+                st.warning("No questions found matching your search. Please try a different keyword.")
+    
+    # Handle Select from a List
+    elif option == "Select from a List":
+        # Display a list of questions
+        st.write("Here are the available questions:")
+        display_qa_for_selection(qa_data, translate, target_language)
     
     # Handle MY LIST: Your Favorite Questions and Answers
-    elif option == translations[target_language]['my_list']:
+    elif option == "MY LIST: Your Favorite Questions and Answers":
         if st.session_state.favorites:
-            st.write("### " + translations[target_language]['my_list'] + ":")
+            st.write("### Your Favorite Questions and Answers:")
             display_qa_for_selection(st.session_state.favorites, translate, target_language)
         else:
-            st.write(translations[target_language]['no_results'])
+            st.write("You don't have any questions in your favorites yet. Try adding some from the other sections.")
 
 if __name__ == "__main__":
     main()
