@@ -32,7 +32,7 @@ def display_qa_for_selection(qa_list, translate=False, lang='en'):
         
         # Show question with a button to toggle the answer
         show_answer = st.session_state.get(answer_key, False)
-        if st.button(f"**{item['Q']}**", key=question_key):
+        if st.button(f"**{item['Q']}**", key=question_key, help="Click to toggle answer visibility"):
             # Toggle the answer visibility
             st.session_state[answer_key] = not show_answer
             show_answer = not show_answer
@@ -50,14 +50,16 @@ def display_qa_for_selection(qa_list, translate=False, lang='en'):
         if show_answer:
             st.write(f"**Answer**: {translated_answer}")
 
-        # Add to favorites or remove from favorites with distinct buttons
+        # Distinguish the "Add to MY LIST" and "Remove from MY LIST" buttons by styling
         favorite_key = f"favorite_{idx}_{item['Q']}"  # Unique key for add/remove favorite
         if item in st.session_state.favorites:
-            if st.button(f"❌ Remove from MY LIST: {translated_question}", key=f"remove_{favorite_key}", help="Click to remove from MY LIST"):
+            # Styled 'Remove from MY LIST' button
+            if st.button(f"❌ Remove from MY LIST", key=f"remove_{favorite_key}", help="Click to remove from favorites", use_container_width=True):
                 st.session_state.favorites.remove(item)
                 st.success(f"Removed '{translated_question}' from MY LIST.")
         else:
-            if st.button(f"❤️ Add to MY LIST: {translated_question}", key=f"add_{favorite_key}", help="Click to add to MY LIST"):
+            # Styled 'Add to MY LIST' button
+            if st.button(f"✔️ Add to MY LIST", key=f"add_{favorite_key}", help="Click to add to favorites", use_container_width=True):
                 st.session_state.favorites.append(item)
                 st.success(f"Added '{translated_question}' to MY LIST.")
 
