@@ -70,7 +70,7 @@ def main():
     option = st.radio("Choose an option to explore:", ["Search by Keywords", "Select from a List", "MY LIST: Your Favorite Questions and Answers"])
 
     # Language selection for translation
-    target_language = st.selectbox("Select language to translate to:", ['en', 'es', 'fr', 'de', 'it', 'pt', 'zh-cn'])
+    target_language = st.selectbox("Select language to translate to:", ['en', 'es', 'fr', 'de', 'it', 'pt', 'zh-cn', 'ar'])
     translate = target_language != 'en'  # Only translate if language is not 'en' (default)
 
     if option == "Search by Keywords":
