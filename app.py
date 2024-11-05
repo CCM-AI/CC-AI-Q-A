@@ -19,35 +19,19 @@ def search_qa(query):
     results = [item for item in qa_data if query.lower() in item['Q'].lower()]
     return results
 
-# Display the questions and answers for the user to select as favorites
+# Function to display the FAQ selection with checkboxes
 def display_qa_for_selection(qa_list):
     if not qa_list:
         st.write("No results found.")
         return
 
-    selected_questions = []
-
     # List the questions with checkboxes for selection
     for idx, item in enumerate(qa_list):
-        # Provide a unique key by using the question text and its index
-        if st.checkbox(f"**{item['Q']}**", key=f"{item['Q']}_{idx}"):
-            selected_questions.append(item)
-    
-    # Add selected questions to favorites
-    if selected_questions:
-        for selected in selected_questions:
-            if selected not in st.session_state.favorites:
-                st.session_state.favorites.append(selected)
-                st.success(f"Added '{selected['Q']}' to your favorites!")
-
-    # Display answers for selected questions
-    if selected_questions:
-        st.write("### Answers to Your Selected Questions:")
-        for selected in selected_questions:
-            st.write(f"**{selected['Q']}**")
-            st.write(f"**Answer**: {selected['A']}")
-    else:
-        st.write("No questions selected yet.")
+        if st.checkbox(f"**{item['Q']}**", key=f"checkbox_{item['Q']}_{idx}"):
+            # Add the question to favorites if checked
+            if item not in st.session_state.favorites:
+                st.session_state.favorites.append(item)
+                st.success(f"Added '{item['Q']}' to your favorites!")
 
 # Main Streamlit app
 def main():
@@ -73,6 +57,15 @@ def main():
         # Display all questions if no categories
         st.write("Here are all the questions available:")
         display_qa_for_selection(qa_data)
+
+    # Display the user's MY LIST (Favorites)
+    if st.session_state.favorites:
+        st.write("### MY LIST: Your Favorite Questions and Answers:")
+        for item in st.session_state.favorites:
+            st.write(f"**{item['Q']}**")
+            st.write(f"**Answer**: {item['A']}")
+    else:
+        st.write("You haven't added any questions to your list yet. Try selecting or searching one.")
 
     # Display the user's favorites from session state
     if st.session_state.favorites:
