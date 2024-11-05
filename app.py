@@ -25,12 +25,15 @@ def display_qa_for_selection(qa_list):
         st.write("No results found.")
         return
 
-    for item in qa_list:
+    for idx, item in enumerate(qa_list):
+        question_key = f"question_{idx}_{item['Q']}"  # Create a unique key for each question
+        answer_key = f"answer_{idx}_{item['Q']}"  # Create a unique key for each answer
+        
         # Show question with a button to toggle the answer
-        show_answer = st.session_state.get(f"show_answer_{item['Q']}", False)
-        if st.button(f"**{item['Q']}**", key=item['Q']):
+        show_answer = st.session_state.get(answer_key, False)
+        if st.button(f"**{item['Q']}**", key=question_key):
             # Toggle the answer visibility
-            st.session_state[f"show_answer_{item['Q']}"] = not show_answer
+            st.session_state[answer_key] = not show_answer
             show_answer = not show_answer
 
         # Show the answer if toggled
@@ -38,12 +41,13 @@ def display_qa_for_selection(qa_list):
             st.write(f"**Answer**: {item['A']}")
         
         # Add to favorites or remove from favorites
+        favorite_key = f"favorite_{idx}_{item['Q']}"  # Unique key for add/remove favorite
         if item in st.session_state.favorites:
-            if st.button(f"Remove from MY LIST: {item['Q']}", key=f"remove_{item['Q']}"):
+            if st.button(f"Remove from MY LIST: {item['Q']}", key=f"remove_{favorite_key}"):
                 st.session_state.favorites.remove(item)
                 st.success(f"Removed '{item['Q']}' from MY LIST.")
         else:
-            if st.button(f"Add to MY LIST: {item['Q']}", key=f"add_{item['Q']}"):
+            if st.button(f"Add to MY LIST: {item['Q']}", key=f"add_{favorite_key}"):
                 st.session_state.favorites.append(item)
                 st.success(f"Added '{item['Q']}' to MY LIST.")
 
