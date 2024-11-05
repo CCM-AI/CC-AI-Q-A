@@ -76,4 +76,17 @@ def main():
             display_qa_for_selection(filtered_favorites)
         else:
             if query:
-                st.warning("No questions found matching your search in MY LIS
+                st.warning("No questions found matching your search in MY LIST.")
+            else:
+                st.write("No favorites added yet. Try selecting some questions to add to your favorites.")
+                
+        # Display all the questions in MY LIST
+        if st.session_state.favorites:
+            for item in st.session_state.favorites:
+                st.write(f"**{item['Q']}**")
+                st.write(f"**Answer**: {item['A']}")
+        else:
+            st.write("You haven't added any questions to your list yet. Try selecting or searching one.")
+
+if __name__ == "__main__":
+    main()
