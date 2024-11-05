@@ -77,38 +77,24 @@ def translate_language_options():
     }
     return language_dict
 
-# Translate the label "What does this mean in your own language?" dynamically
-def translate_label_text(lang):
-    translator = Translator()
-    text = "What does this mean in your own language?"
-    return translator.translate(text, dest=lang).text
-
 # Main Streamlit app
 def main():
     st.title("Health Q&A Tool")
-    st.write("Welcome! You can either search for questions or select from a list of topics, or view your saved favorites.")
+    st.write("Welcome! You can either search for questions, select from a list of topics, or view your saved favorites.")
 
-    # Translate the "What does this mean in your own language?" label dynamically
+    # Language selection for translation
     language_dict = translate_language_options()
-
-    # Language selection dropdown
     target_language = st.selectbox(
-        translate_label_text('en'),  # Default in English, will translate based on selected language
-        list(language_dict.keys()),
+        "What does this mean in your own language?",  # Prompt dynamically translated
+        list(language_dict.keys()), 
         format_func=lambda x: language_dict[x]
     )
 
-    # Translate the label dynamically to the selected language
-    translated_prompt = translate_label_text(target_language)  # Translate the prompt
-
-    # Language selection for translation
-    st.selectbox(translated_prompt, list(language_dict.keys()), format_func=lambda x: language_dict[x])
-
-    # Translate flag to know if translation is needed
-    translate = target_language != 'en'  # Only translate if language is not 'en' (default)
-
     # Handle Search by Keywords
     option = st.radio("Choose an option to explore:", ["Search by Keywords", "Select from a List", "MY LIST: Your Favorite Questions and Answers"])
+
+    # Translate the "What does this mean in your own language?" label dynamically based on selection
+    translate = target_language != 'en'  # Only translate if language is not 'en' (default)
 
     # Handle Search by Keywords
     if option == "Search by Keywords":
