@@ -15,11 +15,11 @@ if 'favorites' not in st.session_state:
     st.session_state.favorites = []
 
 # Function to search questions by keyword
-def search_qa(query):
-    results = [item for item in qa_data if query.lower() in item['Q'].lower()]
+def search_qa(query, qa_list):
+    results = [item for item in qa_list if query.lower() in item['Q'].lower()]
     return results
 
-# Function to display the FAQ selection with checkboxes
+# Function to display questions and allow checkbox selection
 def display_qa_for_selection(qa_list):
     if not qa_list:
         st.write("No results found.")
@@ -36,16 +36,16 @@ def display_qa_for_selection(qa_list):
 # Main Streamlit app
 def main():
     st.title("Health Q&A Tool")
-    st.write("Welcome! You can either search for questions or select from the list of questions to add to your favorites.")
+    st.write("Welcome! You can either search for questions, select from the list of questions, or manage your favorites.")
 
     # Option to choose between search or selection
-    option = st.radio("Choose how you want to explore:", ["Search by Keywords", "Select from a List"])
+    option = st.radio("Choose how you want to explore:", ["Search by Keywords", "Select from a List", "MY LIST"])
 
     if option == "Search by Keywords":
         query = st.text_input("Enter a keyword to search for questions:")
         
         if query:
-            results = search_qa(query)
+            results = search_qa(query, qa_data)
             
             if results:
                 st.write(f"Found {len(results)} matching question(s):")
@@ -54,28 +54,35 @@ def main():
                 st.warning("No questions found matching your search. Please try a different keyword.")
 
     elif option == "Select from a List":
-        # Display all questions if no categories
+        # Display all questions from qa_data if no categories
         st.write("Here are all the questions available:")
         display_qa_for_selection(qa_data)
 
-    # Display the user's MY LIST (Favorites)
-    if st.session_state.favorites:
+    elif option == "MY LIST":
         st.write("### MY LIST: Your Favorite Questions and Answers:")
-        for item in st.session_state.favorites:
-            st.write(f"**{item['Q']}**")
-            st.write(f"**Answer**: {item['A']}")
-    else:
-        st.write("You haven't added any questions to your list yet. Try selecting or searching one.")
-
-    # Display the user's favorites from session state
-    if st.session_state.favorites:
-        st.write("### Your Favorite Questions:")
-        for item in st.session_state.favorites:
-            st.write(f"- **{item['Q']}**")
-
-    # If no favorites, guide the user to add one
-    if not st.session_state.favorites:
-        st.write("You haven't added any questions to your favorites yet. Try selecting or searching one.")
+        
+        # Search functionality for MY LIST
+        query = st.text_input("Search your favorite questions:")
+        
+        # Filter the favorites list based on the search query
+        filtered_favorites = search_qa(query, st.session_state.favorites)
+        
+        if filtered_favorites:
+            st.write(f"Found {len(filtered_favorites)} matching question(s) in your list:")
+            display_qa_for_selection(filtered_favorites)
+        else:
+            if query:
+                st.warning("No questions found matching your search in MY LIST.")
+            else:
+                st.write("No favorites added yet. Try selecting some questions to add to your favorites.")
+                
+        # Display all the questions in MY LIST
+        if st.session_state.favorites:
+            for item in st.session_state.favorites:
+                st.write(f"**{item['Q']}**")
+                st.write(f"**Answer**: {item['A']}")
+        else:
+            st.write("You haven't added any questions to your list yet. Try selecting or searching one.")
 
 if __name__ == "__main__":
     main()
