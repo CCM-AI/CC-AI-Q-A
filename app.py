@@ -73,12 +73,7 @@ def display_qa_for_selection(qa_list, translate=False, lang='en', strings=None):
 def translate_language_options():
     language_dict = {
         'en': 'English',
-        'es': 'Español',
-        'fr': 'Français',
-        'de': 'Deutsch',
-        'it': 'Italiano',
-        'pt': 'Português',
-        'zh-cn': '中文',
+        'zh-cn': '中文 (Chinese)',
         'ar': 'اللغة العربية'
     }
     return language_dict
@@ -110,7 +105,7 @@ def get_translated_strings(lang):
             'added': "Added",
             'to_my_list': "to MY LIST."
         },
-        'es': {
+        'es': {  # Optional in case you want to expand, but for now focusing on the 3 languages
             'welcome': "¡Bienvenido! Puedes buscar preguntas, seleccionar de una lista de temas o ver tus favoritos guardados.",
             'choose_option': "Elige una opción para explorar:",
             'search_by_keywords': "Buscar por palabras clave",
@@ -127,24 +122,6 @@ def get_translated_strings(lang):
             'from_my_list': "de MI LISTA.",
             'added': "Agregado",
             'to_my_list': "a MI LISTA."
-        },
-        'fr': {
-            'welcome': "Bienvenue! Vous pouvez rechercher des questions, sélectionner dans une liste de sujets ou consulter vos favoris enregistrés.",
-            'choose_option': "Choisissez une option à explorer:",
-            'search_by_keywords': "Recherche par mots-clés",
-            'select_from_list': "Sélectionner dans une liste",
-            'my_list': "MA LISTE: Vos questions et réponses préférées",
-            'no_results_found': "Aucun résultat trouvé.",
-            'answer': "Réponse",
-            'click_to_toggle_answer': "Cliquez pour basculer la visibilité de la réponse",
-            'remove_from_my_list': "Retirer de MA LISTE",
-            'remove_from_favorites': "Cliquez pour retirer des favoris",
-            'add_to_my_list': "Ajouter à MA LISTE",
-            'add_to_favorites': "Cliquez pour ajouter aux favoris",
-            'removed': "Retiré",
-            'from_my_list': "de MA LISTE.",
-            'added': "Ajouté",
-            'to_my_list': "à MA LISTE."
         },
         'ar': {
             'welcome': "مرحباً! يمكنك البحث عن الأسئلة، أو اختيار من قائمة المواضيع، أو عرض المفضلة المحفوظة.",
@@ -163,13 +140,31 @@ def get_translated_strings(lang):
             'from_my_list': "من قائمتي.",
             'added': "تم الإضافة",
             'to_my_list': "إلى قائمتي."
+        },
+        'zh-cn': {
+            'welcome': "欢迎！你可以搜索问题，选择一个话题列表，或查看你保存的收藏。",
+            'choose_option': "选择一个选项进行探索：",
+            'search_by_keywords': "按关键字搜索",
+            'select_from_list': "从列表中选择",
+            'my_list': "我的列表：你喜欢的问答",
+            'no_results_found': "未找到结果。",
+            'answer': "回答",
+            'click_to_toggle_answer': "点击以切换答案可见性",
+            'remove_from_my_list': "从我的列表中删除",
+            'remove_from_favorites': "点击以从收藏夹中删除",
+            'add_to_my_list': "添加到我的列表",
+            'add_to_favorites': "点击以添加到收藏夹",
+            'removed': "已删除",
+            'from_my_list': "从我的列表中。",
+            'added': "已添加",
+            'to_my_list': "到我的列表。"
         }
     }
     return strings.get(lang, strings['en'])  # Default to English if language not found
 
 # Main Streamlit app
 def main():
-    # Language selection for translation (moved to top to avoid UnboundLocalError)
+    # Language selection for translation (only Arabic, English, Chinese)
     language_dict = translate_language_options()
     target_language = st.selectbox(
         "What does this mean in your own language?",  # Prompt dynamically translated
