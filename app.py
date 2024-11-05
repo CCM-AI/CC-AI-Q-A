@@ -27,8 +27,8 @@ def display_qa_for_selection(qa_list):
 
     # List the questions with buttons for selection
     for idx, item in enumerate(qa_list):
-        if st.button(f"**{item['Q']}**", key=f"button_{item['Q']}_{idx}"):
-            # Display the answer
+        # Use checkbox to show/hide answer
+        if st.checkbox(f"**{item['Q']}**", key=f"checkbox_{item['Q']}_{idx}"):
             st.write(f"**Answer**: {item['A']}")
             
             # Provide option to add to MY LIST
@@ -36,6 +36,21 @@ def display_qa_for_selection(qa_list):
                 if item not in st.session_state.favorites:
                     st.session_state.favorites.append(item)
                     st.success(f"Added '{item['Q']}' to your favorites!")
+
+# Function to display MY LIST
+def display_my_list():
+    if not st.session_state.favorites:
+        st.write("You haven't added any questions to your list yet. Try selecting or searching one.")
+
+    for idx, item in enumerate(st.session_state.favorites):
+        # Display question and answer
+        st.write(f"**{item['Q']}**")
+        st.write(f"**Answer**: {item['A']}")
+
+        # Option to remove from MY LIST
+        if st.button(f"Remove '{item['Q']}' from MY LIST", key=f"remove_{item['Q']}_{idx}"):
+            st.session_state.favorites.remove(item)
+            st.success(f"Removed '{item['Q']}' from your favorites!")
 
 # Main Streamlit app
 def main():
@@ -81,12 +96,7 @@ def main():
                 st.write("No favorites added yet. Try selecting some questions to add to your favorites.")
                 
         # Display all the questions in MY LIST
-        if st.session_state.favorites:
-            for item in st.session_state.favorites:
-                st.write(f"**{item['Q']}**")
-                st.write(f"**Answer**: {item['A']}")
-        else:
-            st.write("You haven't added any questions to your list yet. Try selecting or searching one.")
+        display_my_list()
 
 if __name__ == "__main__":
     main()
