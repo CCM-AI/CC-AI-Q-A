@@ -9,7 +9,10 @@ def load_qa_data():
 
 # Load initial Q&A data
 qa_data = load_qa_data()
-favorites = []
+
+# Initialize session state for favorites if not already initialized
+if 'favorites' not in st.session_state:
+    st.session_state.favorites = []
 
 # Function to search questions by keyword
 def search_qa(query):
@@ -33,8 +36,8 @@ def display_qa_for_selection(qa_list):
     # Add selected questions to favorites
     if selected_questions:
         for selected in selected_questions:
-            if selected not in favorites:
-                favorites.append(selected)
+            if selected not in st.session_state.favorites:
+                st.session_state.favorites.append(selected)
                 st.success(f"Added '{selected['Q']}' to your favorites!")
 
     # Display answers for selected questions
@@ -71,14 +74,14 @@ def main():
         st.write("Here are all the questions available:")
         display_qa_for_selection(qa_data)
 
-    # Display the user's favorites
-    if favorites:
+    # Display the user's favorites from session state
+    if st.session_state.favorites:
         st.write("### Your Favorite Questions:")
-        for item in favorites:
+        for item in st.session_state.favorites:
             st.write(f"- **{item['Q']}**")
 
     # If no favorites, guide the user to add one
-    if not favorites:
+    if not st.session_state.favorites:
         st.write("You haven't added any questions to your favorites yet. Try selecting or searching one.")
 
 if __name__ == "__main__":
