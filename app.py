@@ -25,8 +25,9 @@ def display_qa_for_selection(qa_list):
     selected_questions = []
 
     # List the questions with checkboxes for selection
-    for item in qa_list:
-        if st.checkbox(f"**{item['Q']}**", key=item['Q']):
+    for idx, item in enumerate(qa_list):
+        # Provide a unique key by using the question text and its index
+        if st.checkbox(f"**{item['Q']}**", key=f"{item['Q']}_{idx}"):
             selected_questions.append(item)
     
     # Add selected questions to favorites
