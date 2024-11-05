@@ -17,9 +17,12 @@ if 'favorites' not in st.session_state:
 
 # Function to search questions by keyword
 def search_qa(query, lang='en'):
+    # Translate the search query to the selected language
     translator = Translator()
-    translated_query = translator.translate(query, dest=lang).text
-    results = [item for item in qa_data if translated_query.lower() in item['Q'].lower()]
+    translated_query = translator.translate(query, dest=lang).text.lower()
+
+    # Search in the dataset for questions that match the translated query
+    results = [item for item in qa_data if translated_query in item['Q'].lower()]
     return results
 
 # Function to toggle answers and add/remove favorites
