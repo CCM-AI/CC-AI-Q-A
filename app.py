@@ -83,7 +83,13 @@ def translate_language_options():
     }
     return language_dict
 
-# Translate the UI strings for each language
+# Translate the label "What does this mean in your own language?" dynamically
+def translate_label_text(lang):
+    translator = Translator()
+    text = "What does this mean in your own language?"
+    return translator.translate(text, dest=lang).text
+
+# Translate UI strings for each language
 def get_translated_strings(lang):
     strings = {
         'en': {
@@ -163,7 +169,7 @@ def get_translated_strings(lang):
 
 # Main Streamlit app
 def main():
-    # Language selection for translation
+    # Language selection for translation (moved to top to avoid UnboundLocalError)
     language_dict = translate_language_options()
     target_language = st.selectbox(
         "What does this mean in your own language?",  # Prompt dynamically translated
@@ -183,21 +189,28 @@ def main():
     # Option to choose between search or selection
     option = st.radio(strings['choose_option'], [strings['search_by_keywords'], strings['select_from_list'], strings['my_list']])
 
-    # Handle user selections
+    # Handle Search by Keywords
     if option == strings['search_by_keywords']:
         query = st.text_input(strings['search_by_keywords'])
+
         if query:
+            # Search in the selected language
             results = search_qa(query, target_language)
+
             if results:
                 st.write(f"{strings['found']} {len(results)} {strings['matching_question']}:")
+
                 display_qa_for_selection(results, translate, target_language, strings)
             else:
                 st.warning(strings['no_results_found'])
     
+    # Handle Select from a List
     elif option == strings['select_from_list']:
+        # Display a list of questions
         st.write(strings['select_from_list'])
         display_qa_for_selection(qa_data, translate, target_language, strings)
     
+    # Handle MY LIST: Your Favorite Questions and Answers
     elif option == strings['my_list']:
         if st.session_state.favorites:
             st.write(f"### {strings['my_list']}:")
