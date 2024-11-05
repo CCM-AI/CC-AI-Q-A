@@ -2,7 +2,7 @@ import streamlit as st
 import json
 from googletrans import Translator
 
-# Load the Q&A data from JSON
+# Load the Q&A data from JSON (assuming questions are in English)
 def load_qa_data():
     with open('responses.json', 'r') as f:
         qa_data = json.load(f)
@@ -15,14 +15,14 @@ qa_data = load_qa_data()
 if 'favorites' not in st.session_state:
     st.session_state.favorites = []
 
-# Function to search questions by keyword in the selected language
+# Function to search questions by keyword (searching in English, displaying in selected language)
 def search_qa(query, lang='en'):
     # Translate the query to the selected language
     translator = Translator()
     translated_query = translator.translate(query, dest=lang).text
     
-    # Search the translated query in the questions
-    results = [item for item in qa_data if translated_query.lower() in translator.translate(item['Q'], dest=lang).text.lower()]
+    # Search the original English questions for the translated query (case insensitive)
+    results = [item for item in qa_data if translated_query.lower() in item['Q'].lower()]
     return results
 
 # Function to toggle answers and add/remove favorites
@@ -123,7 +123,7 @@ def main():
         query = st.text_input("Enter a keyword to search for questions:")
 
         if query:
-            # Search in the selected language
+            # Search in the selected language (translation happens here)
             results = search_qa(query, target_language)
 
             if results:
