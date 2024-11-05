@@ -15,15 +15,20 @@ qa_data = load_qa_data()
 if 'favorites' not in st.session_state:
     st.session_state.favorites = []
 
-# Function to search questions by keyword (searching in English, displaying in selected language)
+# Function to search questions by keyword (searching in the translated query and questions)
 def search_qa(query, lang='en'):
     # Translate the query to the selected language
     translator = Translator()
     translated_query = translator.translate(query, dest=lang).text
+
+    # Translate the questions into the target language and match with the translated query
+    translated_qa_data = []
+    for item in qa_data:
+        translated_question = translator.translate(item['Q'], dest=lang).text
+        if translated_query.lower() in translated_question.lower():
+            translated_qa_data.append(item)
     
-    # Search the original English questions for the translated query (case insensitive)
-    results = [item for item in qa_data if translated_query.lower() in item['Q'].lower()]
-    return results
+    return translated_qa_data
 
 # Function to toggle answers and add/remove favorites
 def display_qa_for_selection(qa_list, translate=False, lang='en'):
