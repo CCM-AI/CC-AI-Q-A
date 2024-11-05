@@ -25,13 +25,17 @@ def display_qa_for_selection(qa_list):
         st.write("No results found.")
         return
 
-    # List the questions with checkboxes for selection
+    # List the questions with buttons for selection
     for idx, item in enumerate(qa_list):
-        if st.checkbox(f"**{item['Q']}**", key=f"checkbox_{item['Q']}_{idx}"):
-            # Add the question to favorites if checked
-            if item not in st.session_state.favorites:
-                st.session_state.favorites.append(item)
-                st.success(f"Added '{item['Q']}' to your favorites!")
+        if st.button(f"**{item['Q']}**", key=f"button_{item['Q']}_{idx}"):
+            # Display the answer
+            st.write(f"**Answer**: {item['A']}")
+            
+            # Provide option to add to MY LIST
+            if st.button(f"Add '{item['Q']}' to MY LIST", key=f"add_{item['Q']}_{idx}"):
+                if item not in st.session_state.favorites:
+                    st.session_state.favorites.append(item)
+                    st.success(f"Added '{item['Q']}' to your favorites!")
 
 # Main Streamlit app
 def main():
@@ -72,17 +76,4 @@ def main():
             display_qa_for_selection(filtered_favorites)
         else:
             if query:
-                st.warning("No questions found matching your search in MY LIST.")
-            else:
-                st.write("No favorites added yet. Try selecting some questions to add to your favorites.")
-                
-        # Display all the questions in MY LIST
-        if st.session_state.favorites:
-            for item in st.session_state.favorites:
-                st.write(f"**{item['Q']}**")
-                st.write(f"**Answer**: {item['A']}")
-        else:
-            st.write("You haven't added any questions to your list yet. Try selecting or searching one.")
-
-if __name__ == "__main__":
-    main()
+                st.warning("No questions found matching your search in MY LIS
