@@ -24,7 +24,8 @@ def search_qa(query):
     results = []
 
     # Check if the query is in English or Arabic
-    if translator.detect(query).lang == 'ar':
+    lang = translator.detect(query).lang
+    if lang == 'ar':
         # If the query is in Arabic, translate the questions to Arabic and search
         for item in qa_data:
             translated_question = translator.translate(item['Q'], src='en', dest='ar').text.lower()
@@ -105,7 +106,9 @@ def get_translated_strings(lang):
             'removed': "Removed",
             'from_my_list': "from MY LIST.",
             'added': "Added",
-            'to_my_list': "to MY LIST."
+            'to_my_list': "to MY LIST.",
+            'found': "Found",  # Added missing key
+            'matching_question': "matching questions."  # Added missing key
         },
         'ar': {
             'welcome': "مرحباً! يمكنك البحث عن الأسئلة، أو اختيار من قائمة المواضيع، أو عرض المفضلة المحفوظة.",
@@ -121,7 +124,9 @@ def get_translated_strings(lang):
             'removed': "تم الإزالة",
             'from_my_list': "من قائمتي.",
             'added': "تم الإضافة",
-            'to_my_list': "إلى قائمتي."
+            'to_my_list': "إلى قائمتي.",
+            'found': "تم العثور",  # Added missing key
+            'matching_question': "أسئلة مطابقة."  # Added missing key
         }
     }
     return strings.get(lang, strings['en'])  # Default to English if language not found
