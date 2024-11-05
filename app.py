@@ -103,25 +103,9 @@ def get_translated_strings(lang):
             'removed': "Removed",
             'from_my_list': "from MY LIST.",
             'added': "Added",
-            'to_my_list': "to MY LIST."
-        },
-        'es': {  # Optional in case you want to expand, but for now focusing on the 3 languages
-            'welcome': "¡Bienvenido! Puedes buscar preguntas, seleccionar de una lista de temas o ver tus favoritos guardados.",
-            'choose_option': "Elige una opción para explorar:",
-            'search_by_keywords': "Buscar por palabras clave",
-            'select_from_list': "Seleccionar de una lista",
-            'my_list': "MI LISTA: Tus preguntas y respuestas favoritas",
-            'no_results_found': "No se encontraron resultados.",
-            'answer': "Respuesta",
-            'click_to_toggle_answer': "Haz clic para alternar la visibilidad de la respuesta",
-            'remove_from_my_list': "Eliminar de MI LISTA",
-            'remove_from_favorites': "Haz clic para eliminar de los favoritos",
-            'add_to_my_list': "Agregar a MI LISTA",
-            'add_to_favorites': "Haz clic para agregar a favoritos",
-            'removed': "Eliminado",
-            'from_my_list': "de MI LISTA.",
-            'added': "Agregado",
-            'to_my_list': "a MI LISTA."
+            'to_my_list': "to MY LIST.",
+            'found': "Found",
+            'matching_question': "matching question(s):"
         },
         'ar': {
             'welcome': "مرحباً! يمكنك البحث عن الأسئلة، أو اختيار من قائمة المواضيع، أو عرض المفضلة المحفوظة.",
@@ -139,7 +123,9 @@ def get_translated_strings(lang):
             'removed': "تم الإزالة",
             'from_my_list': "من قائمتي.",
             'added': "تم الإضافة",
-            'to_my_list': "إلى قائمتي."
+            'to_my_list': "إلى قائمتي.",
+            'found': "تم العثور على",
+            'matching_question': "سؤال (ق) مطابق:"
         },
         'zh-cn': {
             'welcome': "欢迎！你可以搜索问题，选择一个话题列表，或查看你保存的收藏。",
@@ -157,7 +143,9 @@ def get_translated_strings(lang):
             'removed': "已删除",
             'from_my_list': "从我的列表中。",
             'added': "已添加",
-            'to_my_list': "到我的列表。"
+            'to_my_list': "到我的列表。",
+            'found': "找到",
+            'matching_question': "匹配的问题:"
         }
     }
     return strings.get(lang, strings['en'])  # Default to English if language not found
