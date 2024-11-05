@@ -64,14 +64,18 @@ def display_qa_for_selection(qa_list, translate=False, lang='en'):
 # Main Streamlit app
 def main():
     st.title("Health Q&A Tool")
-    st.write("Welcome! You can either search for questions or select from a list of topics, or view your saved favorites.")
+    st.write("Welcome! You can either search for questions, select from a list of topics, or view your saved favorites.")
 
     # Option to choose between search or selection
     option = st.radio("Choose an option to explore:", ["Search by Keywords", "Select from a List", "MY LIST: Your Favorite Questions and Answers"])
 
-    # Language selection for translation
-    target_language = st.selectbox("Select language to translate to:", ['en', 'es', 'fr', 'de', 'it', 'pt', 'zh-cn', 'ar'])
-    translate = target_language != 'en'  # Only translate if language is not 'en' (default)
+    # Language selection for translation (only for MY LIST)
+    if option == "MY LIST: Your Favorite Questions and Answers":
+        target_language = st.selectbox("What does this mean in your own language?", ['en', 'ar'], key="lang_select")
+        translate = target_language != 'en'  # Only translate if language is not 'en' (default)
+    else:
+        translate = False
+        target_language = 'en'
 
     # Handle Search by Keywords
     if option == "Search by Keywords":
