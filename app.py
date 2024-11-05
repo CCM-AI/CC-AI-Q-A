@@ -73,6 +73,7 @@ def main():
     target_language = st.selectbox("Select language to translate to:", ['en', 'es', 'fr', 'de', 'it', 'pt', 'zh-cn', 'ar'])
     translate = target_language != 'en'  # Only translate if language is not 'en' (default)
 
+    # Handle Search by Keywords
     if option == "Search by Keywords":
         query = st.text_input("Enter a keyword to search for questions:")
 
@@ -85,11 +86,13 @@ def main():
             else:
                 st.warning("No questions found matching your search. Please try a different keyword.")
     
+    # Handle Select from a List
     elif option == "Select from a List":
         # Display a list of questions
         st.write("Here are the available questions:")
         display_qa_for_selection(qa_data, translate, target_language)
     
+    # Handle MY LIST: Your Favorite Questions and Answers
     elif option == "MY LIST: Your Favorite Questions and Answers":
         if st.session_state.favorites:
             st.write("### Your Favorite Questions and Answers:")
