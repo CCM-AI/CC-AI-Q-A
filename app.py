@@ -20,20 +20,26 @@ def search_qa(query, qa_list):
     return results
 
 # Function to display questions and allow checkbox selection
-def display_qa_for_selection(qa_list):
+def display_qa_for_selection(qa_list, source="main"):
     if not qa_list:
         st.write("No results found.")
         return
 
     # List the questions with buttons for selection
     for idx, item in enumerate(qa_list):
-        # Use checkbox to show/hide answer
+        # Show question with checkbox to show/hide answer
         if st.checkbox(f"**{item['Q']}**", key=f"checkbox_{item['Q']}_{idx}"):
             st.write(f"**Answer**: {item['A']}")
             
-            # Provide option to add to MY LIST
-            if st.button(f"Add '{item['Q']}' to MY LIST", key=f"add_{item['Q']}_{idx}"):
-                if item not in st.session_state.favorites:
+            # Add or Remove from MY LIST based on whether the question is in the list
+            if item in st.session_state.favorites:
+                # If the item is already in favorites, show "Remove from MY LIST"
+                if st.button(f"Remove '{item['Q']}' from MY LIST", key=f"remove_{item['Q']}_{idx}"):
+                    st.session_state.favorites.remove(item)
+                    st.success(f"Removed '{item['Q']}' from your favorites!")
+            else:
+                # If the item is not in favorites, show "Add to MY LIST"
+                if st.button(f"Add '{item['Q']}' to MY LIST", key=f"add_{item['Q']}_{idx}"):
                     st.session_state.favorites.append(item)
                     st.success(f"Added '{item['Q']}' to your favorites!")
 
@@ -41,14 +47,18 @@ def display_qa_for_selection(qa_list):
 def display_my_list():
     if not st.session_state.favorites:
         st.write("You haven't added any questions to your list yet. Try selecting or searching one.")
+        return
 
+    st.write("### MY LIST: Your Favorite Questions and Answers:")
+
+    # Display all the questions in MY LIST with the same format as Search by Keywords
     for idx, item in enumerate(st.session_state.favorites):
-        # Display question and answer
-        st.write(f"**{item['Q']}**")
-        st.write(f"**Answer**: {item['A']}")
+        # Show question with checkbox to show/hide answer
+        if st.checkbox(f"**{item['Q']}**", key=f"checkbox_fav_{item['Q']}_{idx}"):
+            st.write(f"**Answer**: {item['A']}")
 
-        # Option to remove from MY LIST
-        if st.button(f"Remove '{item['Q']}' from MY LIST", key=f"remove_{item['Q']}_{idx}"):
+        # Allow user to remove questions from MY LIST
+        if st.button(f"Remove '{item['Q']}' from MY LIST", key=f"remove_fav_{item['Q']}_{idx}"):
             st.session_state.favorites.remove(item)
             st.success(f"Removed '{item['Q']}' from your favorites!")
 
@@ -88,7 +98,7 @@ def main():
         
         if filtered_favorites:
             st.write(f"Found {len(filtered_favorites)} matching question(s) in your list:")
-            display_qa_for_selection(filtered_favorites)
+            display_qa_for_selection(filtered_favorites, source="my_list")
         else:
             if query:
                 st.warning("No questions found matching your search in MY LIST.")
