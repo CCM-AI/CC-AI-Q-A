@@ -2,103 +2,138 @@ import streamlit as st
 import json
 from googletrans import Translator
 
-# Load the Q&A data from JSON
+# Load the Q&A data from JSON (ensure this is the right format)
 def load_qa_data():
     with open('responses.json', 'r') as f:
         qa_data = json.load(f)
     return qa_data
 
+# Function to translate text to selected language
+def translate_text(text, lang_code):
+    translator = Translator()
+    try:
+        translated_text = translator.translate(text, dest=lang_code).text
+        return translated_text
+    except Exception as e:
+        st.error(f"Error in translation: {str(e)}")
+        return text
+
 # Load initial Q&A data
 qa_data = load_qa_data()
 
-# To store the list of favorites in the session
-if 'favorites' not in st.session_state:
-    st.session_state.favorites = []
+# Translate content based on the selected language
+def translate_qa_data(language):
+    translated_data = []
+    for item in qa_data:
+        translated_question = translate_text(item['Q'], language)
+        translated_answer = translate_text(item['A'], language)
+        translated_data.append({"Q": translated_question, "A": translated_answer})
+    return translated_data
 
-# Function to search questions by keyword
-def search_qa(query):
-    results = [item for item in qa_data if query.lower() in item['Q'].lower()]
-    return results
+# App instructions and labels in English and Arabic
+translations = {
+    "title": {
+        "en": "Health Q&A Tool",
+        "ar": "أداة الأسئلة والأجوبة الصحية"
+    },
+    "welcome": {
+        "en": "Welcome! You can either search for questions or select from a list of topics.",
+        "ar": "مرحبًا! يمكنك البحث عن الأسئلة أو الاختيار من قائمة الموضوعات."
+    },
+    "search": {
+        "en": "Search by Keywords",
+        "ar": "البحث باستخدام الكلمات الرئيسية"
+    },
+    "select": {
+        "en": "Select from a List",
+        "ar": "اختيار من قائمة"
+    },
+    "my_list": {
+        "en": "MY LIST: Your Favorite Questions and Answers",
+        "ar": "قائمتي: أسئلتي وأجوبتي المفضلة"
+    },
+    "no_results": {
+        "en": "No results found.",
+        "ar": "لم يتم العثور على نتائج."
+    },
+    "no_favorites": {
+        "en": "You haven't added any questions to your favorites yet. Try selecting or searching one.",
+        "ar": "لم تقم بإضافة أي أسئلة إلى المفضلة بعد. جرب تحديد أو البحث عن أحدها."
+    },
+    "remove_from_list": {
+        "en": "Remove from MY LIST",
+        "ar": "إزالة من قائمتي"
+    },
+    "add_to_list": {
+        "en": "Add to MY LIST",
+        "ar": "أضف إلى قائمتي"
+    }
+}
 
-# Function to toggle answers and add/remove favorites
-def display_qa_for_selection(qa_list, translate=False, lang='en'):
-    if not qa_list:
-        st.write("No results found.")
-        return
-
-    for idx, item in enumerate(qa_list):
-        question_key = f"question_{idx}_{item['Q']}"  # Create a unique key for each question
-        answer_key = f"answer_{idx}_{item['Q']}"  # Create a unique key for each answer
-        
-        # Show question with a button to toggle the answer
-        show_answer = st.session_state.get(answer_key, False)
-        if st.button(f"**{item['Q']}**", key=question_key):
-            # Toggle the answer visibility
-            st.session_state[answer_key] = not show_answer
-            show_answer = not show_answer
-
-        # Translate the content if needed
-        if translate:
-            translator = Translator()
-            translated_question = translator.translate(item['Q'], dest=lang).text
-            translated_answer = translator.translate(item['A'], dest=lang).text
-        else:
-            translated_question = item['Q']
-            translated_answer = item['A']
-
-        # Show the translated answer if toggled
-        if show_answer:
-            st.write(f"**Answer**: {translated_answer}")
-
-        # Add to favorites or remove from favorites
-        favorite_key = f"favorite_{idx}_{item['Q']}"  # Unique key for add/remove favorite
-        if item in st.session_state.favorites:
-            if st.button(f"Remove from MY LIST: {translated_question}", key=f"remove_{favorite_key}"):
-                st.session_state.favorites.remove(item)
-                st.success(f"Removed '{translated_question}' from MY LIST.")
-        else:
-            if st.button(f"Add to MY LIST: {translated_question}", key=f"add_{favorite_key}"):
-                st.session_state.favorites.append(item)
-                st.success(f"Added '{translated_question}' to MY LIST.")
+# Function to apply the selected language
+def apply_language(selected_language):
+    return translations[selected_language]
 
 # Main Streamlit app
 def main():
-    st.title("Health Q&A Tool")
-    st.write("Welcome! You can either search for questions or select from a list of topics, or view your saved favorites.")
+    # Language selection (English or Arabic)
+    lang = st.selectbox("Select Language", ["en", "ar"])
+
+    # Translate UI based on selected language
+    labels = apply_language(lang)
+
+    # Set the title and welcome message based on the selected language
+    st.title(labels["title"])
+    st.write(labels["welcome"])
 
     # Option to choose between search or selection
-    option = st.radio("Choose an option to explore:", ["Search by Keywords", "Select from a List", "MY LIST: Your Favorite Questions and Answers"])
+    option = st.radio("Choose how you want to explore:", [labels["search"], labels["select"]])
 
-    # Language selection for translation
-    target_language = st.selectbox("Select language to translate to:", ['en', 'es', 'fr', 'de', 'it', 'pt', 'zh-cn', 'ar'])
-    translate = target_language != 'en'  # Only translate if language is not 'en' (default)
+    # Load translated Q&A data based on the selected language
+    translated_qa_data = translate_qa_data(lang)
 
-    # Handle Search by Keywords
-    if option == "Search by Keywords":
-        query = st.text_input("Enter a keyword to search for questions:")
+    # Display questions for the user to select or search from
+    if option == labels["search"]:
+        query = st.text_input(labels["search"])
 
         if query:
-            results = search_qa(query)
+            results = [item for item in translated_qa_data if query.lower() in item['Q'].lower()]
 
             if results:
                 st.write(f"Found {len(results)} matching question(s):")
-                display_qa_for_selection(results, translate, target_language)
+                for item in results:
+                    if st.button(f"**{item['Q']}**", key=item['Q']):
+                        st.write(f"**Answer**: {item['A']}")
+                        if st.button(f"{labels['add_to_list']}", key=f"add_{item['Q']}"):
+                            # Add to favorites functionality
+                            st.success(f"Added '{item['Q']}' to your favorites!")
+
             else:
-                st.warning("No questions found matching your search. Please try a different keyword.")
-    
-    # Handle Select from a List
-    elif option == "Select from a List":
-        # Display a list of questions
-        st.write("Here are the available questions:")
-        display_qa_for_selection(qa_data, translate, target_language)
-    
-    # Handle MY LIST: Your Favorite Questions and Answers
-    elif option == "MY LIST: Your Favorite Questions and Answers":
-        if st.session_state.favorites:
-            st.write("### Your Favorite Questions and Answers:")
-            display_qa_for_selection(st.session_state.favorites, translate, target_language)
-        else:
-            st.write("You don't have any questions in your favorites yet. Try adding some from the other sections.")
+                st.warning(labels["no_results"])
+
+    elif option == labels["select"]:
+        # Here, display all questions for selection
+        st.write(f"{labels['my_list']}:")
+        for item in translated_qa_data:
+            if st.button(f"**{item['Q']}**", key=f"button_{item['Q']}"):
+                st.write(f"**Answer**: {item['A']}")
+                if st.button(f"{labels['add_to_list']}", key=f"add_select_{item['Q']}"):
+                    # Add to favorites functionality
+                    st.success(f"Added '{item['Q']}' to your favorites!")
+
+    # Display favorites
+    if st.button(f"{labels['my_list']}"):
+        st.write(f"### {labels['my_list']}:")
+        # Dummy favorites list (this would ideally be persistent with state or database)
+        favorites = []  # Add logic to store favorites
+        if not favorites:
+            st.write(labels["no_favorites"])
+
+        for item in favorites:
+            st.write(f"- **{item['Q']}**: {item['A']}")
+            if st.button(f"{labels['remove_from_list']}", key=f"remove_{item['Q']}"):
+                # Logic for removing from favorites
+                st.success(f"Removed '{item['Q']}' from your favorites!")
 
 if __name__ == "__main__":
     main()
