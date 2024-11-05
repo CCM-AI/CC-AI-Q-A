@@ -1,5 +1,6 @@
 import streamlit as st
 import json
+from googletrans import Translator
 
 # Load the Q&A data from JSON
 def load_qa_data():
@@ -20,7 +21,7 @@ def search_qa(query):
     return results
 
 # Function to toggle answers and add/remove favorites
-def display_qa_for_selection(qa_list):
+def display_qa_for_selection(qa_list, translate=False, lang='en'):
     if not qa_list:
         st.write("No results found.")
         return
@@ -36,20 +37,29 @@ def display_qa_for_selection(qa_list):
             st.session_state[answer_key] = not show_answer
             show_answer = not show_answer
 
-        # Show the answer if toggled
+        # Translate the content if needed
+        if translate:
+            translator = Translator()
+            translated_question = translator.translate(item['Q'], dest=lang).text
+            translated_answer = translator.translate(item['A'], dest=lang).text
+        else:
+            translated_question = item['Q']
+            translated_answer = item['A']
+
+        # Show the translated answer if toggled
         if show_answer:
-            st.write(f"**Answer**: {item['A']}")
-        
+            st.write(f"**Answer**: {translated_answer}")
+
         # Add to favorites or remove from favorites
         favorite_key = f"favorite_{idx}_{item['Q']}"  # Unique key for add/remove favorite
         if item in st.session_state.favorites:
-            if st.button(f"Remove from MY LIST: {item['Q']}", key=f"remove_{favorite_key}"):
+            if st.button(f"Remove from MY LIST: {translated_question}", key=f"remove_{favorite_key}"):
                 st.session_state.favorites.remove(item)
-                st.success(f"Removed '{item['Q']}' from MY LIST.")
+                st.success(f"Removed '{translated_question}' from MY LIST.")
         else:
-            if st.button(f"Add to MY LIST: {item['Q']}", key=f"add_{favorite_key}"):
+            if st.button(f"Add to MY LIST: {translated_question}", key=f"add_{favorite_key}"):
                 st.session_state.favorites.append(item)
-                st.success(f"Added '{item['Q']}' to MY LIST.")
+                st.success(f"Added '{translated_question}' to MY LIST.")
 
 # Main Streamlit app
 def main():
@@ -59,6 +69,10 @@ def main():
     # Option to choose between search or selection
     option = st.radio("Choose an option to explore:", ["Search by Keywords", "Select from a List", "MY LIST: Your Favorite Questions and Answers"])
 
+    # Language selection for translation
+    target_language = st.selectbox("Select language to translate to:", ['en', 'es', 'fr', 'de', 'it', 'pt', 'zh-cn'])
+    translate = target_language != 'en'  # Only translate if language is not 'en' (default)
+
     if option == "Search by Keywords":
         query = st.text_input("Enter a keyword to search for questions:")
 
@@ -67,19 +81,19 @@ def main():
 
             if results:
                 st.write(f"Found {len(results)} matching question(s):")
-                display_qa_for_selection(results)
+                display_qa_for_selection(results, translate, target_language)
             else:
                 st.warning("No questions found matching your search. Please try a different keyword.")
     
     elif option == "Select from a List":
         # Display a list of questions
         st.write("Here are the available questions:")
-        display_qa_for_selection(qa_data)
+        display_qa_for_selection(qa_data, translate, target_language)
     
     elif option == "MY LIST: Your Favorite Questions and Answers":
         if st.session_state.favorites:
             st.write("### Your Favorite Questions and Answers:")
-            display_qa_for_selection(st.session_state.favorites)
+            display_qa_for_selection(st.session_state.favorites, translate, target_language)
         else:
             st.write("You don't have any questions in your favorites yet. Try adding some from the other sections.")
 
