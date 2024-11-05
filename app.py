@@ -1,6 +1,6 @@
 import streamlit as st
 import json
-from googletrans import Translator
+from deep_translator import GoogleTranslator
 
 # Load the Q&A data from JSON
 def load_qa_data():
@@ -17,14 +17,16 @@ if 'favorites' not in st.session_state:
 
 # Function to search questions by keyword
 def search_qa(query, lang='en'):
-    translator = Translator()
-    
-    # Translate the query to the target language
-    translated_query = translator.translate(query, dest=lang).text.lower()
+    try:
+        # Translate the query to the target language
+        translated_query = GoogleTranslator(source='auto', target=lang).translate(query).lower()
 
-    # Search in the dataset for questions that match the translated query
-    results = [item for item in qa_data if translated_query in translator.translate(item['Q'], dest=lang).text.lower()]
-    return results
+        # Search in the dataset for questions that match the translated query
+        results = [item for item in qa_data if translated_query in GoogleTranslator(source=lang, target='en').translate(item['Q']).lower()]
+        return results
+    except Exception as e:
+        st.error(f"Translation error: {e}")
+        return []
 
 # Function to toggle answers and add/remove favorites
 def display_qa_for_selection(qa_list, translate=False, lang='en', strings=None):
@@ -38,9 +40,8 @@ def display_qa_for_selection(qa_list, translate=False, lang='en', strings=None):
         
         # Translate the question and answer
         if translate:
-            translator = Translator()
-            translated_question = translator.translate(item['Q'], dest=lang).text
-            translated_answer = translator.translate(item['A'], dest=lang).text
+            translated_question = GoogleTranslator(source='auto', target=lang).translate(item['Q'])
+            translated_answer = GoogleTranslator(source='auto', target=lang).translate(item['A'])
         else:
             translated_question = item['Q']
             translated_answer = item['A']
@@ -80,9 +81,9 @@ def translate_language_options():
 
 # Translate the label "What does this mean in your own language?" dynamically
 def translate_label_text(lang):
-    translator = Translator()
+    translator = GoogleTranslator(source='auto', target=lang)
     text = "What does this mean in your own language?"
-    return translator.translate(text, dest=lang).text
+    return translator.translate(text)
 
 # Translate UI strings for each language
 def get_translated_strings(lang):
@@ -181,8 +182,7 @@ def main():
             results = search_qa(query, target_language)
 
             if results:
-                st.write(f"{strings['found']} {len(results)} {strings['matching_question']}:")
-
+                st.write(f"### {strings['found']} {len(results)} {strings['matching_question']}")
                 display_qa_for_selection(results, translate, target_language, strings)
             else:
                 st.warning(strings['no_results_found'])
@@ -190,7 +190,7 @@ def main():
     # Handle Select from a List
     elif option == strings['select_from_list']:
         # Display a list of questions
-        st.write(strings['select_from_list'])
+        st.write(strings['search_by_keywords'])
         display_qa_for_selection(qa_data, translate, target_language, strings)
     
     # Handle MY LIST: Your Favorite Questions and Answers
