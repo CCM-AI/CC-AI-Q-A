@@ -79,24 +79,25 @@ def translate_language_options():
 
 # Translate the label "What does this mean in your own language?" dynamically
 def translate_label_text(lang):
-    translator = Translator()
+    # Phrase to translate
     text = "What does this mean in your own language?"
-    return translator.translate(text, dest=lang).text
+    translator = Translator()
+    translated_text = translator.translate(text, dest=lang).text
+    return translated_text
 
 # Main Streamlit app
 def main():
-    st.title("Health Q&A Tool")
-    st.write("Welcome! You can either search for questions or select from a list of topics, or view your saved favorites.")
-
-    # Language selection for translation
+    # Translate the "What does this mean in your own language?" label dynamically
     language_dict = translate_language_options()
+    
+    # Set up the language selection dropdown
     target_language = st.selectbox(
-        translate_label_text('en'),  # "What does this mean in your own language?" in English
+        "What does this mean in your own language?",  # The prompt for language selection
         list(language_dict.keys()), 
         format_func=lambda x: language_dict[x]
     )
 
-    # Translate the "What does this mean in your own language?" label dynamically
+    # Translate the label text dynamically based on selected language
     translate = target_language != 'en'  # Only translate if language is not 'en' (default)
 
     # Handle Search by Keywords
