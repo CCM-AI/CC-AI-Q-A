@@ -103,18 +103,15 @@ def main():
     st.title(welcome_text_translated)  # Translated welcome text
     st.write(welcome_text_translated)
 
-    # Language selection for translation
-    st.selectbox(what_does_this_mean_text_translated, list(language_dict.keys()), format_func=lambda x: language_dict[x])
-
     # Handle Search by Keywords
-    option = st.radio("Choose an option to explore:", ["Search by Keywords", "Select from a List", "MY LIST: Your Favorite Questions and Answers"])
+    option = st.radio(translate_dynamic_text("Choose an option to explore:", target_language), ["Search by Keywords", "Select from a List", "MY LIST: Your Favorite Questions and Answers"])
 
     # Translate the "What does this mean in your own language?" label dynamically based on selection
     translate = target_language != 'en'  # Only translate if language is not 'en' (default)
 
     # Handle Search by Keywords
     if option == "Search by Keywords":
-        query = st.text_input("Enter a keyword to search for questions:")
+        query = st.text_input(translate_dynamic_text("Enter a keyword to search for questions:", target_language))
 
         if query:
             results = search_qa(query)
@@ -123,21 +120,21 @@ def main():
                 st.write(f"Found {len(results)} matching question(s):")
                 display_qa_for_selection(results, translate, target_language)
             else:
-                st.warning("No questions found matching your search. Please try a different keyword.")
+                st.warning(translate_dynamic_text("No questions found matching your search. Please try a different keyword.", target_language))
     
     # Handle Select from a List
     elif option == "Select from a List":
         # Display a list of questions
-        st.write("Here are the available questions:")
+        st.write(translate_dynamic_text("Here are the available questions:", target_language))
         display_qa_for_selection(qa_data, translate, target_language)
     
     # Handle MY LIST: Your Favorite Questions and Answers
     elif option == "MY LIST: Your Favorite Questions and Answers":
         if st.session_state.favorites:
-            st.write("### Your Favorite Questions and Answers:")
+            st.write(translate_dynamic_text("### Your Favorite Questions and Answers:", target_language))
             display_qa_for_selection(st.session_state.favorites, translate, target_language)
         else:
-            st.write("You don't have any questions in your favorites yet. Try adding some from the other sections.")
+            st.write(translate_dynamic_text("You don't have any questions in your favorites yet. Try adding some from the other sections.", target_language))
 
 if __name__ == "__main__":
     main()
