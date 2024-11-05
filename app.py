@@ -3,77 +3,32 @@ import json
 from googletrans import Translator
 
 # Load the Q&A data from JSON
+@st.cache_data
 def load_qa_data():
     with open('responses.json', 'r') as f:
-        qa_data = json.load(f)
-    return qa_data
+        return json.load(f)
 
 # Load initial Q&A data
 qa_data = load_qa_data()
 
-# To store the list of favorites in the session
-if 'favorites' not in st.session_state:
-    st.session_state.favorites = []
+# Set up translator and cache translations
+translator = Translator()
 
-# Function to translate questions and answers once for better performance
-def translate_qa_data(qa_data, lang='en'):
-    translator = Translator()
+# Cache translations for questions and answers to avoid repetitive API calls
+@st.cache_data
+def translate_qa_data(qa_data, target_language):
+    if target_language == 'en':
+        return qa_data  # No translation needed for English
+    
     translated_data = []
     for item in qa_data:
-        translated_question = translator.translate(item['Q'], dest=lang).text
-        translated_answer = translator.translate(item['A'], dest=lang).text
         translated_data.append({
-            'Q': translated_question,
-            'A': translated_answer
+            'Q': translator.translate(item['Q'], dest=target_language).text,
+            'A': translator.translate(item['A'], dest=target_language).text
         })
     return translated_data
 
-# Function to search questions by keyword
-def search_qa(query, qa_data, lang='en'):
-    translator = Translator()
-    translated_query = translator.translate(query, dest=lang).text
-
-    # Match with original questions
-    results = []
-    for item in qa_data:
-        translated_question = item['Q'] if lang == 'en' else translator.translate(item['Q'], dest=lang).text
-        if translated_query.lower() in translated_question.lower():
-            results.append(item)
-    
-    return results
-
-# Function to toggle answers and add/remove favorites
-def display_qa_for_selection(qa_list, lang='en'):
-    if not qa_list:
-        st.write(translations[lang]["no_results"])
-        return
-
-    for idx, item in enumerate(qa_list):
-        question_key = f"question_{idx}_{item['Q']}"
-        answer_key = f"answer_{idx}_{item['Q']}"
-
-        # Show question with a button to toggle the answer
-        show_answer = st.session_state.get(answer_key, False)
-        if st.button(f"**{item['Q']}**", key=question_key):
-            st.session_state[answer_key] = not show_answer
-            show_answer = not show_answer
-
-        # Show the answer if toggled
-        if show_answer:
-            st.write(f"**{translations[lang]['answer_label']}**: {item['A']}")
-
-        # Favorite buttons
-        favorite_key = f"favorite_{idx}_{item['Q']}"
-        if item in st.session_state.favorites:
-            if st.button(f"❌ {translations[lang]['remove_favorite']}", key=f"remove_{favorite_key}"):
-                st.session_state.favorites.remove(item)
-                st.success(f"Removed '{item['Q']}' from {translations[lang]['my_list']}.")
-        else:
-            if st.button(f"✔️ {translations[lang]['add_favorite']}", key=f"add_{favorite_key}"):
-                st.session_state.favorites.append(item)
-                st.success(f"Added '{item['Q']}' to {translations[lang]['my_list']}.")
-
-# Translation dictionary for UI text
+# Translate UI text for supported languages
 translations = {
     'en': {
         "welcome": "Welcome! You can either search for questions, select from a list of topics, or view your saved favorites.",
@@ -99,46 +54,84 @@ translations = {
     }
 }
 
+# Function to search questions based on pre-translated data
+def search_qa(query, qa_data):
+    results = [item for item in qa_data if query.lower() in item['Q'].lower()]
+    return results
+
+# Display function with optimized toggling and caching
+def display_qa_for_selection(qa_list, language):
+    if not qa_list:
+        st.write(translations[language]["no_results"])
+        return
+
+    for idx, item in enumerate(qa_list):
+        question_key = f"question_{idx}_{item['Q']}"
+        answer_key = f"answer_{idx}_{item['Q']}"
+
+        # Display each question as a button for toggling the answer visibility
+        show_answer = st.session_state.get(answer_key, False)
+        if st.button(f"**{item['Q']}**", key=question_key):
+            st.session_state[answer_key] = not show_answer
+            show_answer = not show_answer
+
+        # Show the answer if toggled
+        if show_answer:
+            st.write(f"**{translations[language]['answer_label']}**: {item['A']}")
+
+        # Add/Remove from favorites buttons
+        favorite_key = f"favorite_{idx}_{item['Q']}"
+        if item in st.session_state.favorites:
+            if st.button(f"❌ {translations[language]['remove_favorite']}", key=f"remove_{favorite_key}"):
+                st.session_state.favorites.remove(item)
+                st.success(f"Removed '{item['Q']}' from {translations[language]['my_list']}.")
+        else:
+            if st.button(f"✔️ {translations[language]['add_favorite']}", key=f"add_{favorite_key}"):
+                st.session_state.favorites.append(item)
+                st.success(f"Added '{item['Q']}' to {translations[language]['my_list']}.")
+
 # Main Streamlit app
 def main():
+    # Set default session state for favorites
+    if 'favorites' not in st.session_state:
+        st.session_state.favorites = []
+
     # Language selection for translation
     target_language = st.selectbox(
-        translations['en']['search_prompt'],
-        ['en', 'ar'],
+        "Select Language", 
+        ['en', 'ar'], 
         format_func=lambda x: 'English' if x == 'en' else 'العربية'
     )
 
     # Welcome message based on selected language
-    st.write(translations[target_language]['welcome'])
+    st.write(translations[target_language]["welcome"])
 
     # Option to choose between search or selection
-    option = st.radio(translations[target_language]['choose_option'], 
-                      [translations[target_language]['select_list'], 
-                       translations[target_language]['my_list']])
+    option = st.radio(translations[target_language]["choose_option"],
+                      [translations[target_language]["select_list"], 
+                       translations[target_language]["my_list"]])
 
-    # Translate the Q&A data once for performance
+    # Translate Q&A data if needed
     translated_qa_data = translate_qa_data(qa_data, target_language)
 
-    # Handle Search by Keywords
-    if option == translations[target_language]['select_list']:
-        query = st.text_input(translations[target_language]['search_prompt'])
-
+    # Handle "Search by Keywords"
+    if option == translations[target_language]["select_list"]:
+        query = st.text_input(translations[target_language]["search_prompt"])
         if query:
-            results = search_qa(query, translated_qa_data, target_language)
-
+            results = search_qa(query, translated_qa_data)
             if results:
-                st.write(f"Found {len(results)} matching question(s):")
+                st.write(f"{len(results)} {translations[target_language]['answer_label']} found.")
                 display_qa_for_selection(results, target_language)
             else:
-                st.warning(translations[target_language]['no_results'])
+                st.warning(translations[target_language]["no_results"])
 
-    # Handle MY LIST: Your Favorite Questions and Answers
-    elif option == translations[target_language]['my_list']:
+    # Handle "MY LIST: Your Favorite Questions and Answers"
+    elif option == translations[target_language]["my_list"]:
         if st.session_state.favorites:
-            st.write("### " + translations[target_language]['my_list'] + ":")
+            st.write("### " + translations[target_language]["my_list"] + ":")
             display_qa_for_selection(st.session_state.favorites, target_language)
         else:
-            st.write(translations[target_language]['no_results'])
+            st.write(translations[target_language]["no_results"])
 
 if __name__ == "__main__":
     main()
