@@ -10,86 +10,74 @@ def load_qa_data():
 # Load initial Q&A data
 qa_data = load_qa_data()
 
-# Initialize session state for favorites if not already initialized
+# To store the list of favorites in the session
 if 'favorites' not in st.session_state:
     st.session_state.favorites = []
 
 # Function to search questions by keyword
-def search_qa(query, qa_list):
-    results = [item for item in qa_list if query.lower() in item['Q'].lower()]
+def search_qa(query):
+    results = [item for item in qa_data if query.lower() in item['Q'].lower()]
     return results
 
-# Function to display questions and allow checkbox selection
-def display_qa_for_selection(qa_list, source="main"):
+# Function to toggle answers and add/remove favorites
+def display_qa_for_selection(qa_list):
     if not qa_list:
         st.write("No results found.")
         return
 
-    # List the questions with buttons for selection
-    for idx, item in enumerate(qa_list):
-        # Show question with checkbox to show/hide answer
-        if st.checkbox(f"**{item['Q']}**", key=f"checkbox_{item['Q']}_{idx}"):
+    for item in qa_list:
+        # Show question with a button to toggle the answer
+        show_answer = st.session_state.get(f"show_answer_{item['Q']}", False)
+        if st.button(f"**{item['Q']}**", key=item['Q']):
+            # Toggle the answer visibility
+            st.session_state[f"show_answer_{item['Q']}"] = not show_answer
+            show_answer = not show_answer
+
+        # Show the answer if toggled
+        if show_answer:
             st.write(f"**Answer**: {item['A']}")
-            
-            # Add or Remove from MY LIST based on whether the question is in the list
-            if item in st.session_state.favorites:
-                # If the item is already in favorites, show "Remove from MY LIST"
-                if st.button(f"Remove '{item['Q']}' from MY LIST", key=f"remove_{item['Q']}_{idx}"):
-                    st.session_state.favorites.remove(item)
-                    st.success(f"Removed '{item['Q']}' from your favorites!")
-            else:
-                # If the item is not in favorites, show "Add to MY LIST"
-                if st.button(f"Add '{item['Q']}' to MY LIST", key=f"add_{item['Q']}_{idx}"):
-                    st.session_state.favorites.append(item)
-                    st.success(f"Added '{item['Q']}' to your favorites!")
-
-# Function to display MY LIST
-def display_my_list():
-    if not st.session_state.favorites:
-        st.write("You haven't added any questions to your list yet. Try selecting or searching one.")
-        return
-
-    st.write("### MY LIST: Your Favorite Questions and Answers:")
-
-    # Display all the questions in MY LIST with the same format as Search by Keywords
-    for idx, item in enumerate(st.session_state.favorites):
-        # Show question with checkbox to show/hide answer
-        if st.checkbox(f"**{item['Q']}**", key=f"checkbox_fav_{item['Q']}_{idx}"):
-            st.write(f"**Answer**: {item['A']}")
-
-        # Allow user to remove questions from MY LIST
-        if st.button(f"Remove '{item['Q']}' from MY LIST", key=f"remove_fav_{item['Q']}_{idx}"):
-            st.session_state.favorites.remove(item)
-            st.success(f"Removed '{item['Q']}' from your favorites!")
+        
+        # Add to favorites or remove from favorites
+        if item in st.session_state.favorites:
+            if st.button(f"Remove from MY LIST: {item['Q']}", key=f"remove_{item['Q']}"):
+                st.session_state.favorites.remove(item)
+                st.success(f"Removed '{item['Q']}' from MY LIST.")
+        else:
+            if st.button(f"Add to MY LIST: {item['Q']}", key=f"add_{item['Q']}"):
+                st.session_state.favorites.append(item)
+                st.success(f"Added '{item['Q']}' to MY LIST.")
 
 # Main Streamlit app
 def main():
     st.title("Health Q&A Tool")
-    st.write("Welcome! You can either search for questions, select from the list of questions, or manage your favorites.")
+    st.write("Welcome! You can either search for questions or select from a list of topics, or view your saved favorites.")
 
     # Option to choose between search or selection
-    option = st.radio("Choose how you want to explore:", ["Search by Keywords", "Select from a List", "MY LIST"])
+    option = st.radio("Choose an option to explore:", ["Search by Keywords", "Select from a List", "MY LIST: Your Favorite Questions and Answers"])
 
     if option == "Search by Keywords":
         query = st.text_input("Enter a keyword to search for questions:")
-        
+
         if query:
-            results = search_qa(query, qa_data)
-            
+            results = search_qa(query)
+
             if results:
                 st.write(f"Found {len(results)} matching question(s):")
                 display_qa_for_selection(results)
             else:
                 st.warning("No questions found matching your search. Please try a different keyword.")
-
+    
     elif option == "Select from a List":
-        # Display all questions from qa_data if no categories
-        st.write("Here are all the questions available:")
+        # Display a list of questions
+        st.write("Here are the available questions:")
         display_qa_for_selection(qa_data)
-
-    elif option == "MY LIST":
-        # Display all the questions in MY LIST with the same format as Search by Keywords
-        display_my_list()
+    
+    elif option == "MY LIST: Your Favorite Questions and Answers":
+        if st.session_state.favorites:
+            st.write("### Your Favorite Questions and Answers:")
+            display_qa_for_selection(st.session_state.favorites)
+        else:
+            st.write("You don't have any questions in your favorites yet. Try adding some from the other sections.")
 
 if __name__ == "__main__":
     main()
