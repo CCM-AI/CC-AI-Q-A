@@ -26,4 +26,46 @@ def display_faq(qa_list):
     for index, item in enumerate(qa_list):
         with st.expander(f"**{item['Q']}**", expanded=False):  # Makes it expandable like a FAQ
             # Display the answer when clicked
-            st.write(f"**Answer**
+            st.write(f"**Answer**: {item['A']}")
+
+            # Add to favorites button
+            if st.button(f"Add '{item['Q']}' to Favorites", key=f"favorite_{index}"):
+                favorites.append(item)
+                st.success(f"Added '{item['Q']}' to your favorites!")
+
+# Main Streamlit app
+def main():
+    st.title("Health Q&A Tool")
+    st.write("Welcome! You can either search for questions or explore all available questions.")
+
+    # Option to choose between search or view all questions
+    option = st.radio("Choose how you want to explore:", ["Search by Keywords", "View All Questions"])
+
+    if option == "Search by Keywords":
+        query = st.text_input("Enter a keyword to search for questions:")
+
+        if query:
+            results = search_qa(query)
+
+            if results:
+                st.write(f"Found {len(results)} matching question(s):")
+                display_faq(results)
+            else:
+                st.warning("No questions found matching your search. Please try a different keyword.")
+
+    elif option == "View All Questions":
+        st.write("Here are all the available questions:")
+        display_faq(qa_data)
+
+    # Display the user's favorites
+    if favorites:
+        st.write("### Your Favorite Questions:")
+        for item in favorites:
+            st.write(f"- **{item['Q']}**")
+
+    # If no favorites, guide the user to add one
+    if not favorites:
+        st.write("You haven't added any questions to your favorites yet. Try selecting or searching one.")
+
+if __name__ == "__main__":
+    main()
