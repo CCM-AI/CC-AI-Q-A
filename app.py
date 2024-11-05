@@ -87,7 +87,16 @@ def translate_label_text(lang):
 
 # Main Streamlit app
 def main():
-    st.title("Health Q&A Tool")
+    # Language selection for translation (moved to top to avoid UnboundLocalError)
+    language_dict = translate_language_options()
+    target_language = st.selectbox(
+        "What does this mean in your own language?",  # Prompt dynamically translated
+        list(language_dict.keys()), 
+        format_func=lambda x: language_dict[x]
+    )
+
+    # Translate the "What does this mean in your own language?" label dynamically
+    translate = target_language != 'en'  # Only translate if language is not 'en' (default)
 
     # Translate the "Welcome" message dynamically based on the selected language
     welcome_text = {
@@ -103,18 +112,7 @@ def main():
     
     st.write(welcome_text.get(target_language, welcome_text['en']))
 
-    # Language selection for translation
-    language_dict = translate_language_options()
-    target_language = st.selectbox(
-        "What does this mean in your own language?",  # Prompt dynamically translated
-        list(language_dict.keys()), 
-        format_func=lambda x: language_dict[x]
-    )
-
-    # Translate the "What does this mean in your own language?" label dynamically
-    translate = target_language != 'en'  # Only translate if language is not 'en' (default)
-
-    # Handle Search by Keywords
+    # Option to choose between search or selection
     option = st.radio("Choose an option to explore:", ["Search by Keywords", "Select from a List", "MY LIST: Your Favorite Questions and Answers"])
 
     # Handle Search by Keywords
