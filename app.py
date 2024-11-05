@@ -77,11 +77,13 @@ def translate_language_options():
     }
     return language_dict
 
+# Translate dynamic text based on language selected
+def translate_dynamic_text(text, lang):
+    translator = Translator()
+    return translator.translate(text, dest=lang).text
+
 # Main Streamlit app
 def main():
-    st.title("Health Q&A Tool")
-    st.write("Welcome! You can either search for questions, select from a list of topics, or view your saved favorites.")
-
     # Language selection for translation
     language_dict = translate_language_options()
     target_language = st.selectbox(
@@ -89,6 +91,20 @@ def main():
         list(language_dict.keys()), 
         format_func=lambda x: language_dict[x]
     )
+
+    # Translate dynamic text based on selected language
+    welcome_text = "Welcome! You can either search for questions, select from a list of topics, or view your saved favorites."
+    what_does_this_mean_text = "What does this mean in your own language?"
+
+    # Translate the welcome text and the language prompt text dynamically
+    welcome_text_translated = translate_dynamic_text(welcome_text, target_language)
+    what_does_this_mean_text_translated = translate_dynamic_text(what_does_this_mean_text, target_language)
+
+    st.title(welcome_text_translated)  # Translated welcome text
+    st.write(welcome_text_translated)
+
+    # Language selection for translation
+    st.selectbox(what_does_this_mean_text_translated, list(language_dict.keys()), format_func=lambda x: language_dict[x])
 
     # Handle Search by Keywords
     option = st.radio("Choose an option to explore:", ["Search by Keywords", "Select from a List", "MY LIST: Your Favorite Questions and Answers"])
