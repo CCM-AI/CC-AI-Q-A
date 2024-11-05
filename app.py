@@ -16,63 +16,69 @@ def search_qa(query):
     results = [item for item in qa_data if query.lower() in item['Q'].lower()]
     return results
 
-# Display all questions in a FAQ-style format
-def display_faq(qa_list):
+# Display the questions and answers for the user to select as favorites
+def display_qa_for_selection(qa_list):
     if not qa_list:
         st.write("No results found.")
         return
 
-    # List the questions as a FAQ
-    for index, item in enumerate(qa_list):
-        with st.expander(f"**{item['Q']}**", expanded=False):  # Makes it expandable like a FAQ
-            # Display the answer when clicked
-            st.write(f"**Answer**: {item['A']}")
+    selected_questions = []
 
-            # Add to favorites button
-            if st.button(f"Add '{item['Q']}' to Favorites", key=f"favorite_{index}"):
-                if item not in favorites:
-                    favorites.append(item)
-                    st.success(f"Added '{item['Q']}' to your favorites!")
-                else:
-                    st.warning(f"'{item['Q']}' is already in your favorites.")
+    # List the questions with checkboxes for selection
+    for item in qa_list:
+        if st.checkbox(f"**{item['Q']}**", key=item['Q']):
+            selected_questions.append(item)
+    
+    # Add selected questions to favorites
+    if selected_questions:
+        for selected in selected_questions:
+            if selected not in favorites:
+                favorites.append(selected)
+                st.success(f"Added '{selected['Q']}' to your favorites!")
 
-# Display the user's favorites with both question and answer
-def display_favorites():
-    if favorites:
-        st.write("### Your Favorite Questions:")
-        for index, item in enumerate(favorites):
-            st.write(f"- **{item['Q']}**")
-            st.write(f"  **Answer**: {item['A']}")
-            st.markdown("---")  # Adds a separator between favorites
+    # Display answers for selected questions
+    if selected_questions:
+        st.write("### Answers to Your Selected Questions:")
+        for selected in selected_questions:
+            st.write(f"**{selected['Q']}**")
+            st.write(f"**Answer**: {selected['A']}")
     else:
-        st.write("You haven't added any questions to your favorites yet. Try selecting or searching one.")
+        st.write("No questions selected yet.")
 
 # Main Streamlit app
 def main():
     st.title("Health Q&A Tool")
-    st.write("Welcome! You can either search for questions or explore all available questions.")
+    st.write("Welcome! You can either search for questions or select from the list of questions to add to your favorites.")
 
-    # Option to choose between search or view all questions
-    option = st.radio("Choose how you want to explore:", ["Search by Keywords", "View All Questions"])
+    # Option to choose between search or selection
+    option = st.radio("Choose how you want to explore:", ["Search by Keywords", "Select from a List"])
 
     if option == "Search by Keywords":
         query = st.text_input("Enter a keyword to search for questions:")
-
+        
         if query:
             results = search_qa(query)
-
+            
             if results:
                 st.write(f"Found {len(results)} matching question(s):")
-                display_faq(results)
+                display_qa_for_selection(results)
             else:
                 st.warning("No questions found matching your search. Please try a different keyword.")
 
-    elif option == "View All Questions":
-        st.write("Here are all the available questions:")
-        display_faq(qa_data)
+    elif option == "Select from a List":
+        # Display all questions if no categories
+        st.write("Here are all the questions available:")
+        display_qa_for_selection(qa_data)
 
-    # Display the user's favorites section
-    display_favorites()
+    # Display the user's favorites
+    if favorites:
+        st.write("### Your Favorite Questions:")
+        for item in favorites:
+            st.write(f"- **{item['Q']}**")
+
+    # If no favorites, guide the user to add one
+    if not favorites:
+        st.write("You haven't added any questions to your favorites yet. Try selecting or searching one.")
 
 if __name__ == "__main__":
     main()
