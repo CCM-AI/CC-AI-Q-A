@@ -88,15 +88,23 @@ def main():
     st.title("Health Q&A Tool")
     st.write("Welcome! You can either search for questions or select from a list of topics, or view your saved favorites.")
 
-    # Language selection for translation
+    # Translate the "What does this mean in your own language?" label dynamically
     language_dict = translate_language_options()
+
+    # Language selection dropdown
     target_language = st.selectbox(
-        "What does this mean in your own language?",  # Prompt dynamically translated
-        list(language_dict.keys()), 
+        translate_label_text('en'),  # Default in English, will translate based on selected language
+        list(language_dict.keys()),
         format_func=lambda x: language_dict[x]
     )
 
-    # Translate the "What does this mean in your own language?" label dynamically
+    # Translate the label dynamically to the selected language
+    translated_prompt = translate_label_text(target_language)  # Translate the prompt
+
+    # Language selection for translation
+    st.selectbox(translated_prompt, list(language_dict.keys()), format_func=lambda x: language_dict[x])
+
+    # Translate flag to know if translation is needed
     translate = target_language != 'en'  # Only translate if language is not 'en' (default)
 
     # Handle Search by Keywords
