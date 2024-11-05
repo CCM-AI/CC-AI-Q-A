@@ -88,24 +88,7 @@ def main():
         display_qa_for_selection(qa_data)
 
     elif option == "MY LIST":
-        st.write("### MY LIST: Your Favorite Questions and Answers:")
-        
-        # Search functionality for MY LIST
-        query = st.text_input("Search your favorite questions:")
-        
-        # Filter the favorites list based on the search query
-        filtered_favorites = search_qa(query, st.session_state.favorites)
-        
-        if filtered_favorites:
-            st.write(f"Found {len(filtered_favorites)} matching question(s) in your list:")
-            display_qa_for_selection(filtered_favorites, source="my_list")
-        else:
-            if query:
-                st.warning("No questions found matching your search in MY LIST.")
-            else:
-                st.write("No favorites added yet. Try selecting some questions to add to your favorites.")
-                
-        # Display all the questions in MY LIST
+        # Display all the questions in MY LIST with the same format as Search by Keywords
         display_my_list()
 
 if __name__ == "__main__":
