@@ -19,7 +19,8 @@ if 'favorites' not in st.session_state:
 def search_qa(query, lang='en'):
     translator = Translator()
     translated_query = translator.translate(query, dest=lang).text
-    results = [item for item in qa_data if translated_query.lower() in item['Q'].lower()]
+    # Search in the selected language
+    results = [item for item in qa_data if translator.translate(item['Q'], dest=lang).text.lower() in translated_query.lower()]
     return results
 
 # Function to toggle answers and add/remove favorites
