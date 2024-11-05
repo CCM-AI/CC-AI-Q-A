@@ -15,110 +15,90 @@ qa_data = load_qa_data()
 if 'favorites' not in st.session_state:
     st.session_state.favorites = []
 
-# Predefined keywords in English (can add more for variety)
-keyword_list_en = ["Python", "JavaScript", "Data Science", "Machine Learning", "Streamlit", "API"]
-
-# Translate keywords based on selected language
-def get_translated_keywords(lang):
+# Function to search questions by keyword, supporting all languages
+def search_qa(query):
     translator = Translator()
-    return [translator.translate(keyword, dest=lang).text for keyword in keyword_list_en]
+    
+    # Convert the query to lowercase for consistent searching
+    query_lower = query.lower()
 
-# Function to search questions by keyword
-def search_qa(query, lang='en'):
-    translator = Translator()
-    translated_query = translator.translate(query, dest='en').text.lower()  # Always translate to English for dataset matching
-    results = [item for item in qa_data if translated_query in item['Q'].lower()]
+    results = []
+    for item in qa_data:
+        # Translate the question to the language of the query
+        translated_question = translator.translate(item['Q'], src='en', dest='auto').text.lower()
+        
+        # Check if the query appears in the translated question text
+        if query_lower in translated_question:
+            results.append(item)
+
     return results
 
-# Function to toggle answers and add/remove favorites
-def display_qa_for_selection(qa_list, translate=False, lang='en', strings=None):
+# Function to display questions and answers
+def display_qa_for_selection(qa_list):
     if not qa_list:
-        st.write(strings['no_results_found'])
+        st.write("No results found.")
         return
 
     for idx, item in enumerate(qa_list):
-        question_key = f"question_{idx}_{item['Q']}"
-        answer_key = f"answer_{idx}_{item['Q']}"
+        question_key = f"question_{idx}_{item['Q']}"  # Create a unique key for each question
+        answer_key = f"answer_{idx}_{item['Q']}"  # Create a unique key for each answer
 
-        if translate:
-            translator = Translator()
-            translated_question = translator.translate(item['Q'], dest=lang).text
-            translated_answer = translator.translate(item['A'], dest=lang).text
-        else:
-            translated_question = item['Q']
-            translated_answer = item['A']
-
+        # Show question with a button to toggle the answer
         show_answer = st.session_state.get(answer_key, False)
-        if st.button(f"**{translated_question}**", key=question_key, help=strings['click_to_toggle_answer']):
+        if st.button(f"**{item['Q']}**", key=question_key, help="Click to toggle answer visibility"):
+            # Toggle the answer visibility
             st.session_state[answer_key] = not show_answer
             show_answer = not show_answer
 
+        # Show the answer if toggled
         if show_answer:
-            st.write(f"**{strings['answer']}**: {translated_answer}")
+            st.write(f"**Answer**: {item['A']}")
 
-        favorite_key = f"favorite_{idx}_{item['Q']}"
+        # Favorite functionality
+        favorite_key = f"favorite_{idx}_{item['Q']}"  # Unique key for add/remove favorite
         if item in st.session_state.favorites:
-            if st.button(f"❌ {strings['remove_from_my_list']}", key=f"remove_{favorite_key}", help=strings['remove_from_favorites'], use_container_width=True):
+            if st.button("❌ Remove from MY LIST", key=f"remove_{favorite_key}"):
                 st.session_state.favorites.remove(item)
-                st.success(f"{strings['removed']} '{translated_question}' {strings['from_my_list']}.")
+                st.success(f"Removed '{item['Q']}' from MY LIST.")
         else:
-            if st.button(f"✔️ {strings['add_to_my_list']}", key=f"add_{favorite_key}", help=strings['add_to_favorites'], use_container_width=True):
+            if st.button("✔️ Add to MY LIST", key=f"add_{favorite_key}"):
                 st.session_state.favorites.append(item)
-                st.success(f"{strings['added']} '{translated_question}' {strings['to_my_list']}.")
-
-# Translate language options dynamically
-def translate_language_options():
-    language_dict = {
-        'en': 'English',
-        'es': 'Español',
-        'fr': 'Français',
-        'de': 'Deutsch',
-        'it': 'Italiano',
-        'pt': 'Português',
-        'zh-cn': '中文',
-        'ar': 'اللغة العربية'
-    }
-    return language_dict
-
-# Translate UI strings for each language
-def get_translated_strings(lang):
-    strings = {
-        'en': {'search_by_keywords': "Search by Keywords", 'no_results_found': "No results found.", 'answer': "Answer"},
-        'es': {'search_by_keywords': "Buscar por palabras clave", 'no_results_found': "No se encontraron resultados.", 'answer': "Respuesta"},
-        'fr': {'search_by_keywords': "Recherche par mots-clés", 'no_results_found': "Aucun résultat trouvé.", 'answer': "Réponse"},
-        # Add other languages here
-    }
-    return strings.get(lang, strings['en'])
+                st.success(f"Added '{item['Q']}' to MY LIST.")
 
 # Main Streamlit app
 def main():
-    language_dict = translate_language_options()
-    target_language = st.selectbox("Select your language:", list(language_dict.keys()), format_func=lambda x: language_dict[x])
-    translate = target_language != 'en'
-    strings = get_translated_strings(target_language)
+    st.title("Multilingual Q&A App")
 
-    st.write(strings['search_by_keywords'])
+    # Option to choose between search or selection
+    option = st.radio("Choose an option to explore:", ["Search by Keywords", "Select from a List", "MY LIST"])
 
-    # Display predefined keywords in the selected language
-    translated_keywords = get_translated_keywords(target_language)
-    keyword = st.selectbox("Choose a keyword:", translated_keywords)
+    # Handle Search by Keywords
+    if option == "Search by Keywords":
+        query = st.text_input("Search by Keywords")
 
-    # Input field for custom keyword search
-    custom_keyword = st.text_input("Or enter your own keyword:")
+        if query:
+            # Search across all languages
+            results = search_qa(query)
 
-    # Determine search query based on user choice
-    if custom_keyword:
-        search_query = custom_keyword
-    else:
-        search_query = keyword
-
-    if search_query:
-        results = search_qa(search_query, target_language)
-        if results:
-            st.write(f"Found {len(results)} matching questions:")
-            display_qa_for_selection(results, translate, target_language, strings)
+            if results:
+                st.write(f"Found {len(results)} matching questions:")
+                display_qa_for_selection(results)
+            else:
+                st.warning("No results found.")
+    
+    # Handle Select from a List
+    elif option == "Select from a List":
+        # Display a list of questions
+        st.write("Select from a list of questions:")
+        display_qa_for_selection(qa_data)
+    
+    # Handle MY LIST: Your Favorite Questions and Answers
+    elif option == "MY LIST":
+        if st.session_state.favorites:
+            st.write("### MY LIST: Your Favorite Questions and Answers")
+            display_qa_for_selection(st.session_state.favorites)
         else:
-            st.warning(strings['no_results_found'])
+            st.write("You have no favorites saved.")
 
 if __name__ == "__main__":
     main()
