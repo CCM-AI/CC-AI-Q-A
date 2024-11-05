@@ -71,7 +71,11 @@ def main():
 
     # Language selection for translation (only for MY LIST)
     if option == "MY LIST: Your Favorite Questions and Answers":
-        target_language = st.selectbox("What does this mean in your own language?", ['en', 'ar'], key="lang_select")
+        target_language = st.selectbox(
+            "What does this mean in your own language? / ماذا يعني هذا بلغة بلدك؟",
+            ['en', 'ar'],
+            key="lang_select"
+        )
         translate = target_language != 'en'  # Only translate if language is not 'en' (default)
     else:
         translate = False
