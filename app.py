@@ -15,28 +15,37 @@ qa_data = load_qa_data()
 if 'favorites' not in st.session_state:
     st.session_state.favorites = []
 
-# Function to detect language and search questions by keyword
-def search_qa(query):
+# Cache the translations to avoid repeated calls
+@st.cache_data
+def translate_questions(questions, src='en', dest='ar'):
     translator = Translator()
+    translations = {}
     
-    # Convert the query to lowercase for consistent searching
+    for question in questions:
+        translated = translator.translate(question, src=src, dest=dest).text
+        translations[question] = translated
+    
+    return translations
+
+# Function to search questions by keyword
+def search_qa(query):
+    # Pre-process the query for case-insensitivity
     query_lower = query.lower()
     results = []
 
-    # Check if the query is in English or Arabic
-    lang = translator.detect(query).lang
+    # Check if the query is in Arabic or English based on the content
+    lang = 'ar' if any(char in query for char in 'ءئبجحخدذرزسشصضطظعغفقكلمنهوي') else 'en'
+    
+    # Prepare the translation based on the detected language
     if lang == 'ar':
-        # If the query is in Arabic, translate the questions to Arabic and search
-        for item in qa_data:
-            translated_question = translator.translate(item['Q'], src='en', dest='ar').text.lower()
-            if query_lower in translated_question:
-                results.append(item)
+        translated_questions = translate_questions([item['Q'] for item in qa_data], src='en', dest='ar')
     else:
-        # Assume English if not Arabic
-        for item in qa_data:
-            translated_question = translator.translate(item['Q'], src='ar', dest='en').text.lower()
-            if query_lower in translated_question:
-                results.append(item)
+        translated_questions = translate_questions([item['Q'] for item in qa_data], src='ar', dest='en')
+
+    for item in qa_data:
+        translated_question = translated_questions[item['Q']].lower()
+        if query_lower in translated_question:
+            results.append(item)
 
     return results
 
@@ -52,9 +61,8 @@ def display_qa_for_selection(qa_list, translate=False, lang='en', strings=None):
         
         # Translate the question and answer if needed
         if translate:
-            translator = Translator()
-            translated_question = translator.translate(item['Q'], dest=lang).text
-            translated_answer = translator.translate(item['A'], dest=lang).text
+            translated_question = translate_questions(item['Q'], dest=lang).get(item['Q'], item['Q'])
+            translated_answer = translate_questions(item['A'], dest=lang).get(item['A'], item['A'])
         else:
             translated_question = item['Q']
             translated_answer = item['A']
