@@ -72,6 +72,10 @@ translations = {
 
 # Function to apply the selected language
 def apply_language(selected_language):
+    # Ensure the language is valid
+    if selected_language not in translations["title"]:
+        st.error("Invalid language selected.")
+        return translations["en"]  # Fallback to English if invalid
     return translations[selected_language]
 
 # Main Streamlit app
