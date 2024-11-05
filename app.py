@@ -36,14 +36,7 @@ def display_qa_for_selection(qa_list, translate=False, lang='en', strings=None):
         question_key = f"question_{idx}_{item['Q']}"  # Create a unique key for each question
         answer_key = f"answer_{idx}_{item['Q']}"  # Create a unique key for each answer
         
-        # Show question with a button to toggle the answer
-        show_answer = st.session_state.get(answer_key, False)
-        if st.button(f"**{item['Q']}**", key=question_key, help=strings['click_to_toggle_answer']):
-            # Toggle the answer visibility
-            st.session_state[answer_key] = not show_answer
-            show_answer = not show_answer
-
-        # Translate the content if needed
+        # Translate the question and answer
         if translate:
             translator = Translator()
             translated_question = translator.translate(item['Q'], dest=lang).text
@@ -51,6 +44,13 @@ def display_qa_for_selection(qa_list, translate=False, lang='en', strings=None):
         else:
             translated_question = item['Q']
             translated_answer = item['A']
+        
+        # Show question with a button to toggle the answer
+        show_answer = st.session_state.get(answer_key, False)
+        if st.button(f"**{translated_question}**", key=question_key, help=strings['click_to_toggle_answer']):
+            # Toggle the answer visibility
+            st.session_state[answer_key] = not show_answer
+            show_answer = not show_answer
 
         # Show the translated answer if toggled
         if show_answer:
@@ -180,7 +180,7 @@ def main():
     # Translate the "What does this mean in your own language?" label dynamically
     translate = target_language != 'en'  # Only translate if language is not 'en' (default)
 
-    # Get translated UI strings for the selected language
+    # Get translated UI strings
     strings = get_translated_strings(target_language)
 
     # Translate the "Welcome" message dynamically based on the selected language
