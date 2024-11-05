@@ -30,8 +30,22 @@ def display_faq(qa_list):
 
             # Add to favorites button
             if st.button(f"Add '{item['Q']}' to Favorites", key=f"favorite_{index}"):
-                favorites.append(item)
-                st.success(f"Added '{item['Q']}' to your favorites!")
+                if item not in favorites:
+                    favorites.append(item)
+                    st.success(f"Added '{item['Q']}' to your favorites!")
+                else:
+                    st.warning(f"'{item['Q']}' is already in your favorites.")
+
+# Display the user's favorites with both question and answer
+def display_favorites():
+    if favorites:
+        st.write("### Your Favorite Questions:")
+        for index, item in enumerate(favorites):
+            st.write(f"- **{item['Q']}**")
+            st.write(f"  **Answer**: {item['A']}")
+            st.markdown("---")  # Adds a separator between favorites
+    else:
+        st.write("You haven't added any questions to your favorites yet. Try selecting or searching one.")
 
 # Main Streamlit app
 def main():
@@ -57,15 +71,8 @@ def main():
         st.write("Here are all the available questions:")
         display_faq(qa_data)
 
-    # Display the user's favorites
-    if favorites:
-        st.write("### Your Favorite Questions:")
-        for item in favorites:
-            st.write(f"- **{item['Q']}**")
-
-    # If no favorites, guide the user to add one
-    if not favorites:
-        st.write("You haven't added any questions to your favorites yet. Try selecting or searching one.")
+    # Display the user's favorites section
+    display_favorites()
 
 if __name__ == "__main__":
     main()
