@@ -91,7 +91,7 @@ def main():
     # Language selection for translation
     language_dict = translate_language_options()
     target_language = st.selectbox(
-        "What does this mean in your own language?",  # Prompt dynamically translated
+        translate_label_text('en'),  # "What does this mean in your own language?" in English
         list(language_dict.keys()), 
         format_func=lambda x: language_dict[x]
     )
