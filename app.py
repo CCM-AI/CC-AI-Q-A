@@ -1,6 +1,6 @@
 import streamlit as st
 import json
-from googletrans import Translator, LANGUAGES
+from googletrans import Translator
 
 # Load the Q&A data from JSON
 def load_qa_data():
@@ -74,13 +74,10 @@ def display_qa_for_selection(qa_list, translate=False, lang='en', strings=None):
 
 # Translate language options dynamically
 def translate_language_options():
-    return LANGUAGES  # Utilize googletrans's built-in language support
-
-# Translate the label "What does this mean in your own language?" dynamically
-def translate_label_text(lang):
-    translator = Translator()
-    text = "What does this mean in your own language?"
-    return translator.translate(text, dest=lang).text
+    return {
+        'en': 'English',
+        'ar': 'العربية'
+    }
 
 # Translate UI strings for each language
 def get_translated_strings(lang):
@@ -104,46 +101,6 @@ def get_translated_strings(lang):
             'to_my_list': "to MY LIST.",
             'found': "Found",
             'matching_question': "matching questions"
-        },
-        'es': {
-            'welcome': "¡Bienvenido! Puedes buscar preguntas, seleccionar de una lista de temas o ver tus favoritos guardados.",
-            'choose_option': "Elige una opción para explorar:",
-            'search_by_keywords': "Buscar por palabras clave",
-            'select_from_list': "Seleccionar de una lista",
-            'my_list': "MI LISTA: Tus preguntas y respuestas favoritas",
-            'no_results_found': "No se encontraron resultados.",
-            'answer': "Respuesta",
-            'click_to_toggle_answer': "Haz clic para alternar la visibilidad de la respuesta",
-            'remove_from_my_list': "Eliminar de MI LISTA",
-            'remove_from_favorites': "Haz clic para eliminar de los favoritos",
-            'add_to_my_list': "Agregar a MI LISTA",
-            'add_to_favorites': "Haz clic para agregar a favoritos",
-            'removed': "Eliminado",
-            'from_my_list': "de MI LISTA.",
-            'added': "Agregado",
-            'to_my_list': "a MI LISTA.",
-            'found': "Encontrado",
-            'matching_question': "preguntas coincidentes"
-        },
-        'fr': {
-            'welcome': "Bienvenue! Vous pouvez rechercher des questions, sélectionner dans une liste de sujets ou consulter vos favoris enregistrés.",
-            'choose_option': "Choisissez une option à explorer:",
-            'search_by_keywords': "Recherche par mots-clés",
-            'select_from_list': "Sélectionner dans une liste",
-            'my_list': "MA LISTE: Vos questions et réponses préférées",
-            'no_results_found': "Aucun résultat trouvé.",
-            'answer': "Réponse",
-            'click_to_toggle_answer': "Cliquez pour basculer la visibilité de la réponse",
-            'remove_from_my_list': "Retirer de MA LISTE",
-            'remove_from_favorites': "Cliquez pour retirer des favoris",
-            'add_to_my_list': "Ajouter à MA LISTE",
-            'add_to_favorites': "Cliquez pour ajouter aux favoris",
-            'removed': "Retiré",
-            'from_my_list': "de MA LISTE.",
-            'added': "Ajouté",
-            'to_my_list': "à MA LISTE.",
-            'found': "Trouvé",
-            'matching_question': "questions correspondantes"
         },
         'ar': {
             'welcome': "مرحباً! يمكنك البحث عن الأسئلة، أو اختيار من قائمة المواضيع، أو عرض المفضلة المحفوظة.",
@@ -170,10 +127,10 @@ def get_translated_strings(lang):
 
 # Main Streamlit app
 def main():
-    # Language selection for translation (moved to top to avoid UnboundLocalError)
+    # Language selection for translation
     language_dict = translate_language_options()
     target_language = st.selectbox(
-        translate_label_text('en'),  # Prompt dynamically translated
+        "Select your language:",  # Label for language selection
         list(language_dict.keys()), 
         format_func=lambda x: language_dict[x]
     )
