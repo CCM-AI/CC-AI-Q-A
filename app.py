@@ -64,7 +64,7 @@ def display_qa_for_selection(qa_list, translate=False, lang='en'):
                 st.success(f"Added '{translated_question}' to MY LIST.")
 
 # Translate language options dynamically
-def translate_language_options(lang):
+def translate_language_options():
     language_dict = {
         'en': 'English',
         'es': 'Español',
@@ -75,7 +75,13 @@ def translate_language_options(lang):
         'zh-cn': '中文',
         'ar': 'اللغة العربية'
     }
-    return language_dict.get(lang, lang)  # Return the translated language name
+    return language_dict
+
+# Translate the label "What does this mean in your own language?" dynamically
+def translate_label_text(lang):
+    translator = Translator()
+    text = "What does this mean in your own language?"
+    return translator.translate(text, dest=lang).text
 
 # Main Streamlit app
 def main():
@@ -83,21 +89,17 @@ def main():
     st.write("Welcome! You can either search for questions or select from a list of topics, or view your saved favorites.")
 
     # Language selection for translation
+    language_dict = translate_language_options()
     target_language = st.selectbox(
-        translate_language_options('en'),
-        ['en', 'es', 'fr', 'de', 'it', 'pt', 'zh-cn', 'ar'],
-        index=0
+        "What does this mean in your own language?",  # Prompt dynamically translated
+        list(language_dict.keys()), 
+        format_func=lambda x: language_dict[x]
     )
-    
-    # Translate the "What does this mean in your own language?" label dynamically
-    translator = Translator()
-    translate_label = translator.translate('What does this mean in your own language?', dest=target_language).text
 
-    # Display the translated language selection prompt
-    target_language = st.selectbox(translate_label, ['en', 'es', 'fr', 'de', 'it', 'pt', 'zh-cn', 'ar'], index=0)
+    # Translate the "What does this mean in your own language?" label dynamically
     translate = target_language != 'en'  # Only translate if language is not 'en' (default)
 
-    # Option to choose between search or selection
+    # Handle Search by Keywords
     option = st.radio("Choose an option to explore:", ["Search by Keywords", "Select from a List", "MY LIST: Your Favorite Questions and Answers"])
 
     # Handle Search by Keywords
